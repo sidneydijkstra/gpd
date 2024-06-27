@@ -1,6 +1,7 @@
 import fs from 'fs';
 import { defaultFolder, isFolderGitRepository } from '../helpers/gitHelper.mjs';
 import git from '@npmcli/git';
+import { response } from 'express';
 
 const defaultFolderPath = './.rebpg';
 
@@ -17,11 +18,24 @@ export async function cloneRepository(url, branch, folderName) {
 }
 
 export async function pullRepository(folderName) {
+    var isSuccessful = false
     var folderPath = `${defaultFolderPath}/${folderName}`
     if(isFolderGitRepository(folderPath)) {
-        await git.pull(folderPath)
+        await git.spawn(['pull'], {cwd: folderPath})
+            .then(response => {
+                isSuccessful = response.stdout != 'Already up to date.'
+            })
     } else {
         console.log("Folder is not a git repository")
+    }
+
+    return isSuccessful
+}
+
+export async function removeRepositoryFolder(folderName) {
+    var folderPath = `${defaultFolderPath}/${folderName}`
+    if(isFolderGitRepository(folderPath)) {
+        fs.rmdirSync(folderPath, {recursive: true})
     }
 }
 

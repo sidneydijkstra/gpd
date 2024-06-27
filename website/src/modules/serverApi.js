@@ -17,6 +17,14 @@ export async function getRepositoryByGuid(guid){
     return apiClient.repository[`${guid}`].get()
 }
 
+export async function updateRepository(guid){
+    return apiClient.repository[`${guid}`].update.post()
+}
+
+export async function deleteRepository(guid){
+    return apiClient.repository[`${guid}`].delete()
+}
+
 export async function getFiles(username, repository, path=''){
     if(path == ''){
         return apiClient.files[`${username}`][`${repository}`][``].get()

@@ -25,11 +25,15 @@ export function getRepositoryByGuid(guid){
   return new Promise(async (resolve, reject) => {
       await getConnection()
         .then(async conn => {
-          var result = await conn.get('select * from repos where guid = ?', guid)
+          var result = await conn.get(`select * from repos where guid = ?`, guid)
           conn.close()
           resolve(result)
         })
-        .catch(reject)
+        .catch(error => {
+          
+          console.log(error)
+          reject(error)
+        })
   })
 }
 
@@ -40,7 +44,7 @@ export function addRepository(username, repository, content){
           var guid = v4() // generate guid
           var parsedContent = JSON.stringify(content)
 
-          var result = await conn.all("insert into repos values (null, ?, ?, ?, ?, datetime('now'))", [
+          var result = await conn.all(`insert into repos values (null, ?, ?, ?, ?, datetime('now'))`, [
             guid,
             username,
             repository,
@@ -78,6 +82,19 @@ export function removeRepository(username, repository){
             username, 
             repository
           ])
+          conn.close()
+          
+          resolve(result)
+        })
+        .catch(reject)
+  })
+}
+
+export function removeRepositoryByGuid(guid){
+  return new Promise(async (resolve, reject) => {
+      await getConnection()
+        .then(async conn => {
+          var result = await conn.all('delete from repos where guid = ?', guid)
           conn.close()
           
           resolve(result)

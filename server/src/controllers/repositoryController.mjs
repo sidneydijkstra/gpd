@@ -1,7 +1,7 @@
 import express from 'express'
 import { getRepo, onError, rateLimit } from "../modules/githubApi.mjs"
-import { getRepositories, getRepositoryByGuid, addRepository } from '../modules/databaseClient.mjs'
-import { cloneRepository } from '../modules/fileClient.mjs'
+import { getRepositories, getRepositoryByGuid, addRepository, updateRepository, removeRepositoryByGuid } from '../modules/databaseClient.mjs'
+import { cloneRepository, pullRepository, removeRepositoryFolder } from '../modules/fileClient.mjs'
 
 const router = express.Router()
 
@@ -10,8 +10,8 @@ var cashedRepositories = [];
 // Load cached repositories
 (async () => {
     await getRepositories().then(response => {
-            response.forEach(x => {
-                cashedRepositories[`${x.username}:${x.repository}`] = x
+            response.forEach(repo => {
+                cashedRepositories[`${repo.username}:${repo.repository}`] = repo
             })
         });
 })();
@@ -20,13 +20,13 @@ router.get('/api/repository', async (req, res) => {
     var result = Object.values(cashedRepositories);
     console.log(result)
     res.status(200).json(result);
-}), 
+})
 
 router.get('/api/repository/:user/:repository', async (req, res) => {
     // Get cache key from this repository
     var cacheKey = `${req.params.user}:${req.params.repository}`
     // Check if there is a cached repository and node forced to load
-    if(cashedRepositories[cacheKey] != null && !req.query.force){
+    if(cashedRepositories[cacheKey] != null){
         res.status(200).json(cashedRepositories[cacheKey])
         return
     }
@@ -38,7 +38,10 @@ router.get('/api/repository/:user/:repository', async (req, res) => {
         .then(response => {
             result = response
         })
-        .catch(onError)
+        .catch(_ => {
+            res.status(404).json({message: 'Repository not found'})
+            return
+        })
     console.log(await rateLimit())
 
     // Add repository to database
@@ -70,7 +73,79 @@ router.get('/api/repository/:guid', async (req, res) => {
     await getRepositoryByGuid(req.params.guid)
         .then(response => {
             // Return the repository
-            res.status(200).json(responses);
+            res.status(200).json(response);
+        })
+        .catch(_ => {
+            res.status(404).json({message: 'Repository not found'})
+        })
+})
+
+router.post('/api/repository/:guid/update', async (req, res) => {
+    // Add repository to database
+    await getRepositoryByGuid(req.params.guid)
+        .then(async response => {
+            // Check if repository exists
+            var pullRequest = await pullRepository(`${response.username}-${response.repository}`)
+            console.log(`Pull request completed: ${pullRequest}`)
+
+            // Get repository retails
+            console.log(await rateLimit())
+            await getRepo(response.username, response.repository)
+                .then(async response => {
+                    // Update repository
+                    await updateRepository(req.params.guid, response)
+                        .then(async _ => {
+                            // Return the updated repository
+                            await getRepositoryByGuid(req.params.guid)
+                                .then(response => {
+                                    // Return the repository
+                                    res.status(200).json(response);
+                                })
+                                .catch(_ => {
+                                    res.status(404).json({message: '2.Repository not found'})
+                                })
+                        })
+                        .catch(_ => {
+                            res.status(500).json({message: 'Error updating repository'})
+                        })
+                })
+                .catch(onError)
+            console.log(await rateLimit())
+        })
+        .catch(_ => {
+            res.status(404).json({message: 'Repository not found ' + _})
+        })
+})
+
+router.delete('/api/repository/:guid', async (req, res) => {
+    // Add repository to database
+    await getRepositoryByGuid(req.params.guid)
+        .then(async response => {
+            // Check if repository exists
+            if(response == null){
+                res.status(404).json({message: 'Repository not found'})
+                return
+            }
+
+            // Delete repository
+            await removeRepositoryByGuid(req.params.guid)
+                .then(async _ => {
+                    console.log('Repository deleted')
+
+                    // Remove repository folder
+                    await removeRepositoryFolder(`${response.username}-${response.repository}`)
+
+                    // Delete repository from cache
+                    if(cashedRepositories[`${response.username}:${response.repository}`] != null){
+                        delete cashedRepositories[`${response.username}:${response.repository}`]
+                    }
+
+                    // Return the deleted repository
+                    res.status(200).json(response);
+                })
+                .catch(_ => {
+                    res.status(500).json({message: 'Error deleting repository'})
+                })
         })
         .catch(_ => {
             res.status(404).json({message: 'Repository not found'})
