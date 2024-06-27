@@ -1,13 +1,19 @@
 import express from 'express'
 import { getAllFiles } from '../modules/fileClient.mjs'
+import { getRepositoryByGuid } from '../modules/databaseClient.mjs'
 
 const router = express.Router()
 
-router.get('/api/files/:user/:repository/*', async (req, res) => {
-    console.log(req.params[0])
+router.get('/api/files/:guid/*', async (req, res) => {
+    var repo = await getRepositoryByGuid(req.params.guid)
+    if(repo == null){
+        res.status(404).json({message: 'Repository not found'})
+        return
+    }
+
     var folders = req.params[0].replace(',', '/')
-    console.log(req.params[0])
-    var result = getAllFiles(`${req.params.user}-${req.params.repository}`, folders)
+    console.log('file route: ', req.params[0])
+    var result = getAllFiles(`${repo.username}-${repo.repository}`, folders)
     res.status(200).json(result);
 })
 

@@ -8,6 +8,6 @@ import { open } from 'sqlite'
   })
 
   console.log(await db.get('select * from repos'))
-  console.log(await db.get('delete from repos where 1 = 1'))
-  console.log(await db.get('select * from repos'))
+  // console.log(await db.get('delete from repos where 1 = 1'))
+  // console.log(await db.get('select * from repos'))
 })()

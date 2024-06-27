@@ -13,6 +13,10 @@ export async function getRepository(username, repository){
     return apiClient.repository[`${username}`][`${repository}`].get()
 }
 
+export async function getRepositoryByGuid(guid){
+    return apiClient.repository[`${guid}`].get()
+}
+
 export async function getFiles(username, repository, path=''){
     if(path == ''){
         return apiClient.files[`${username}`][`${repository}`][``].get()

@@ -1,7 +1,7 @@
 <script setup>
 import { onBeforeMount, onMounted, ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router'
-import { getRepository, getFiles } from '@/modules/serverApi.js'
+import { getRepositoryByGuid, getFiles } from '@/modules/serverApi.js'
 
 
 const route = useRoute()
@@ -20,13 +20,13 @@ watch(
 
 async function onClickFile(file){
   var path = route.params.folders ? route.params.folders.join('/') + '/' + file.name : file.name
-  await router.push(`/repo/${route.params.username}/${route.params.repository}/${path}`)
+  await router.push(`/repo/${route.params.guid}/${path}`)
 }
 
 async function loadFiles(){
   isLoading.value = true
   var path = route.params.folders ? route.params.folders.join('/') : ''
-  await getFiles(route.params.username, route.params.repository, path)
+  await getFiles(route.params.guid, path)
     .then(response => {
       if(response.inDirectory){
         response.files.sort((a, b) => (a.isDirectory && !b.isDirectory) ? -1 : (!a.isDirectory && b.isDirectory) ? 1 : a.name.localeCompare(b.name))
@@ -44,7 +44,7 @@ async function loadFiles(){
 
 onBeforeMount(async () => {
   console.log(route.params.folders)
-  await getRepository(route.params.username, route.params.repository)
+  await getRepositoryByGuid(route.params.guid)
     .then(response => {
       console.log(response)
       repo.value = response

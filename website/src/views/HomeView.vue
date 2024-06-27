@@ -20,17 +20,21 @@ function onAddRepository(){
 
   getRepository(repoForm.username, repoForm.repository)
     .then(response => {
+      response.content = JSON.parse(response.content)
       repos.value.push(response)
     })
 }
 
-function onNavigateToRepo(fullName){
-  router.push(`/repo/${fullName}`)
+function onNavigateToRepo(guid){
+  router.push(`/repo/${guid}`)
 }
 
 onMounted(async () => {
   await getStoredRepositories()
     .then(response => {
+      response.forEach(repo => {
+        repo.content = JSON.parse(repo.content)
+      })
       repos.value = response
     })
 })
@@ -61,13 +65,13 @@ onMounted(async () => {
     <div class="row justify-content-center">
         <div class="col-4">
         <div class="list-group">
-            <a v-for="repo in repos" href="#" class="list-group-item list-group-item-action" aria-current="true" v-on:click="onNavigateToRepo(repo.full_name)">
+            <a v-for="repo in repos" href="#" class="list-group-item list-group-item-action" aria-current="true" v-on:click="onNavigateToRepo(repo.guid)">
                 <div class="d-flex w-100 justify-content-between">
-                    <h5 class="mb-1">{{ repo.full_name }}</h5>
-                    <small>{{ repo.language }}</small>
+                    <h5 class="mb-1">{{ repo.content.full_name }}</h5>
+                    <small>{{ repo.content.language }}</small>
                 </div>
-                <p class="mb-1">{{ repo.description }}</p>
-                <small>Not updated.</small>
+                <p class="mb-1">{{ repo.content.description }}</p>
+                <small>Last update at {{ repo.lastUpdated }}</small>
             </a>
         </div>
         </div>

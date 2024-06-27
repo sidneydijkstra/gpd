@@ -8,10 +8,14 @@ import { open } from 'sqlite'
     })
 
     await db.exec(`
+        DROP TABLE IF EXISTS repos;
         CREATE TABLE IF NOT EXISTS repos (
+            id integer PRIMARY KEY AUTOINCREMENT,
+            guid varchar(255),
             username varchar(255),
             repository varchar(255),
-            content text
+            content text,
+            lastUpdated time
         )
     `)
 })()

@@ -5,8 +5,8 @@ import RepoView from '@/views/RepoView.vue'
 
 const routes = [
   { path: '/', component: HomeView },
-  { path: '/repo/:username/:repository', component: RepoView },
-  { path: '/repo/:username/:repository/:folders(.*)*', component: RepoView }
+  { path: '/repo/:guid', component: RepoView },
+  { path: '/repo/:guid/:folders(.*)*', component: RepoView }
 ]
 
 const router = createRouter({
