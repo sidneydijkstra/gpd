@@ -7,7 +7,7 @@ import { open } from 'sqlite'
     driver: sqlite3.Database
   })
 
-  var res = await db.all(`select * from repos where guid = 'c726909d-384f-4ebb-91e2-e111dc1c4cf5'`)
+  var res = await db.all(`select * from repos`)
   console.log(res)
   // console.log(await db.get('delete from repos where 1 = 1'))
   // console.log(await db.get('select * from repos'))

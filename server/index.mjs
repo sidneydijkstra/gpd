@@ -6,6 +6,8 @@ import bodyParser from 'body-parser'
 import repositoryRouter from './src/controllers/repositoryController.mjs'
 import fileRouter from './src/controllers/fileController.mjs'
 
+import { checkRepositories } from './src/modules/runner/repoChecker.mjs'
+
 const app = express()
 const port = 3000
 app.use(cors());
@@ -18,3 +20,5 @@ app.use(fileRouter)
 app.listen(port, () => {
     console.log(`Example app listening on port ${port}`)
 })
+
+checkRepositories()
