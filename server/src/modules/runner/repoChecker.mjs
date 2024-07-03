@@ -1,7 +1,7 @@
-import { getRepositories } from '../databaseClient.mjs'
+import { getRepositories } from '../database/repositories.mjs'
 import { pullRepository } from '../fileClient.mjs'
 
-const CHECKER_INTERVAL = 30000
+const CHECKER_INTERVAL = 100000
 
 function sleep(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));

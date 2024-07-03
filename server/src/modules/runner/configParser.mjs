@@ -5,3 +5,7 @@ export function parseConfigFile(path){
     const file = fs.readFileSync(path, 'utf8')
     return YAML.parse(file)
 }
+
+export function parseConfigString(config){
+    return YAML.parse(config)
+}

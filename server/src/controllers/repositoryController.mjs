@@ -1,6 +1,6 @@
 import express from 'express'
 import { getRepo, onError, rateLimit } from "../modules/githubApi.mjs"
-import { getRepositories, getRepositoryByGuid, addRepository, updateRepository, removeRepositoryByGuid } from '../modules/databaseClient.mjs'
+import { getRepositories, getRepositoryByGuid, addRepository, updateRepository, removeRepositoryByGuid } from '../modules/database/repositories.mjs'
 import { cloneRepository, pullRepository, removeRepositoryFolder } from '../modules/fileClient.mjs'
 
 const router = express.Router()

@@ -1,6 +1,6 @@
 import express from 'express'
 import { getAllFiles } from '../modules/fileClient.mjs'
-import { getRepositoryByGuid } from '../modules/databaseClient.mjs'
+import { getRepositoryByGuid } from '../modules/database/repositories.mjs'
 
 const router = express.Router()
 

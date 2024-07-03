@@ -2,11 +2,20 @@ import { createWebHistory, createRouter } from 'vue-router'
 
 import HomeView from '@/views/HomeView.vue'
 import RepoView from '@/views/RepoView.vue'
+import PipeView from '@/views/PipeView.vue'
+import PipeEditView from '@/views/PipeEditView.vue'
+import PipeCompView from '@/views/PipeCompView.vue'
+import SettingsView from '@/views/SettingsView.vue'
 
 const routes = [
-  { path: '/', component: HomeView },
-  { path: '/repo/:guid', component: RepoView },
-  { path: '/repo/:guid/:folders(.*)*', component: RepoView }
+  { name: 'home', path: '/', component: HomeView },
+  { name: 'repo', path: '/repo/:guid', component: RepoView },
+  { name: 'repo', path: '/repo/:guid/:folders(.*)*', component: RepoView },
+  { name: 'pipe', path: '/pipe/:guid', component: PipeView },
+  { name: 'pipe-editn', path: '/pipe/:guid/edit', component: PipeEditView },
+  { name: 'pipe-edit', path: '/pipe/:guid/edit/:pipeGuid', component: PipeEditView },
+  { name: 'pipe-view', path: '/pipe/:guid/view/:pipeGuid', component: PipeCompView },
+  { name: 'settings', path: '/settings/:guid', component: SettingsView },
 ]
 
 const router = createRouter({

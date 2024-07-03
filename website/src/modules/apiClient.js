@@ -21,7 +21,15 @@ export function generateAPI(baseUrl, defaults = {}) {
                             payload.body = JSON.stringify(data);
                         }
                     }
-                    return fetch(url, payload).then((d) => d.json());
+                    return fetch(url, payload)
+                        .then(response => response.text()) // Parse the response as text
+                        .then(text => {
+                            try {
+                                return JSON.parse(text)
+                            } catch(err) {
+                                return text
+                            }
+                        })
                 };
             }
 

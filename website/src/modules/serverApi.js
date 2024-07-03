@@ -2,6 +2,7 @@ import { generateAPI } from "./apiClient.js";
 
 const apiClient = generateAPI("http://localhost:3000/api", {
     headers: {
+        "Content-Type": "application/json",
     },
 });
 
@@ -37,4 +38,38 @@ export async function getFiles(username, repository, path=''){
     }
 
     return call.get()
+}
+
+export async function runPipeline(guid){
+    return apiClient.pipeline[`${guid}`].run.post()
+}
+
+export async function getPipelinesByRepository(repoGuid){
+    return apiClient.from[`${repoGuid}`].pipeline.get()
+}
+
+export async function getPipelineByGuid(guid){
+    return apiClient.pipeline[`${guid}`].get()
+}
+
+export async function addPipeline(repoGuid, name, content){
+    return apiClient.from[`${repoGuid}`].pipeline.post({
+        name: name, 
+        content: content
+    })
+}
+
+export async function updatePipeline(guid, name, content){
+    return apiClient.pipeline[`${guid}`].update.post({
+        name: name,
+        content: content
+    })
+}
+
+export async function deletePipeline(guid){
+    return apiClient.pipeline[`${guid}`].delete()
+}
+
+export async function getPipelineTransactions(guid){
+    return apiClient.pipeline[`${guid}`].transaction.get()
 }

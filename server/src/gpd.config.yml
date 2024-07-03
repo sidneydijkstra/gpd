@@ -1,11 +1,9 @@
-log_path: 'gpb-cicd.log'
-
 jobs:
   - name: 'job1'
     tasks:
       - name: 'useCmd'
         title: 'Run echo command'
-        command: 'fasfasf'
+        command: 'echo "Hello World!"'
       - name: 'useCmd'
         title: 'Run npm command'
         command: 'npm --version'

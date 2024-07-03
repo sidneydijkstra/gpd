@@ -1,4 +1,5 @@
 <script setup>
+import SideMenu from '@/components/SideMenu.vue'
 import { onBeforeMount, onMounted, ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router'
 import { getRepositoryByGuid, updateRepository, deleteRepository, getFiles } from '@/modules/serverApi.js'
@@ -21,30 +22,6 @@ watch(
 async function onClickFile(file){
   var path = route.params.folders ? route.params.folders.join('/') + '/' + file.name : file.name
   await router.push(`/repo/${route.params.guid}/${path}`)
-}
-
-async function onClickUpdate(){
-  await updateRepository(route.params.guid)
-    .then(async response => {
-      await loadRepository()
-    })
-    .catch(error => {
-      console.log(error)
-    })
-    .finally(() => {
-    })
-}
-
-async function onClickDelete(){
-  await deleteRepository(route.params.guid)
-    .then(response => {
-      router.push('/')
-    })
-    .catch(error => {
-      console.log(error)
-    })
-    .finally(() => {
-    })
 }
 
 async function loadRepository(){
@@ -103,24 +80,9 @@ onBeforeMount(async () => {
 <template>
   <div v-if="!isLoading" class="row justify-content-center">
 
+    
     <div class="col-4">
-      <div class="card">
-        <div class="card-header">
-          Repository
-        </div>
-        <div class="p-2">
-          <div class="input-group mb-3">
-            <span class="input-group-text" id="basic-addon1">Guid</span>
-            <input type="text" class="form-control" :value="repo.guid" readonly>
-          </div>
-          <p>{{ repo.content.description }}</p>
-          <hr>
-          <button class="btn btn-dark m-1" v-on:click="onClickUpdate">Update</button>
-          <button class="btn btn-danger m-1" v-on:click="onClickDelete">delete</button>
-          
-          <p class="m-2"><b>Last Updated At:</b> {{ repo.lastUpdated }}</p>
-        </div>
-      </div>
+      <SideMenu />
     </div>
 
     <div class="col-6">
