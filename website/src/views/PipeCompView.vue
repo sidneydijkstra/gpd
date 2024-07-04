@@ -24,7 +24,7 @@ async function onClickRun(){
 
     await getPipelineTransactions(route.params.pipeGuid)
         .then(response => {
-            transactions.value = response
+            transactions.value = response.reverse()
         })
         .catch(error => {
             console.log(error)
@@ -67,7 +67,7 @@ async function reload(){
 
     await getPipelineTransactions(route.params.pipeGuid)
         .then(response => {
-            transactions.value = response
+            transactions.value = response.reverse()
         })
         .catch(error => {
             console.log(error)

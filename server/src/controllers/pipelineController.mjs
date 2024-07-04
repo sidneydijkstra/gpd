@@ -1,8 +1,8 @@
 import express from 'express'
 import { getRepositoryByGuid, getRepositoryById } from '../modules/database/repositories.mjs'
-import { getPipelinesByRepository, getPipelineByGuid, addPipeline, updatePipeline, removePipeline, getPipelineTransactions, addPipelineTransaction, updatePipelineTransaction } from '../modules/database/pipelines.mjs'
+import { getPipelinesByRepository, getPipelineByGuid, addPipeline, updatePipeline, removePipeline, getPipelineTransactions, addPipelineTransaction } from '../modules/database/pipelines.mjs'
 
-import { runConfig } from '../modules/runner/jobRunner.mjs'
+import { spawnRunner } from '../modules/runner/spawnRunner.mjs'
 
 const router = express.Router()
 
@@ -21,15 +21,9 @@ router.post('/api/pipeline/:guid/run', async (req, res) => {
 
     await addPipelineTransaction(pipeline.id, repository.id, 'Manual Run', false, 'Running', '')
         .then(async response => {
-            runConfig(pipeline.content.replace(/\\n/g, '\n').replace(/\\"/g, '\"').slice(1,-1), repository)
-                .then(async result => {
-                    await updatePipelineTransaction(response, true, 'Finished', result)
-                })
-                .catch(async error => {
-                    await updatePipelineTransaction(response, true, 'Error', error)
-                })
+            spawnRunner(response, repository.guid, pipeline.guid)
 
-            res.status(200).json({guid: response.guid})
+            res.status(200).json({guid: response})
         })
         .catch(error => {
             res.status(500).json({message: error})

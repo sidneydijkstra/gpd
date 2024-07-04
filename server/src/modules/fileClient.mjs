@@ -83,10 +83,10 @@ export function getFileContent(folderName, fileName) {
     }
 }
 
-export function prepareWorkerFolder(projectName) {
+export function prepareWorkerFolder(projectName, uniqueId='') {
     createFolder(defaultWorkerFolderPath)
 
-    var folderPath = `${defaultWorkerFolderPath}/${projectName}`
+    var folderPath = `${defaultWorkerFolderPath}/${projectName}-${uniqueId}`
     createFolder(folderPath)
     createFolder(`${folderPath}/project`)
     createFolder(`${folderPath}/storage`)
