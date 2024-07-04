@@ -150,3 +150,59 @@ export function updatePipelineTransaction(guid, completed, status, content){
           .catch(reject)
     })
 }
+
+export function getPipelineTasks(transactionId){
+    return new Promise(async (resolve, reject) => {
+        await getConnection()
+          .then(async conn => {
+            var result = await conn.all('select * from pipeline_tasks where transactionId = ?', transactionId)
+            conn.close()
+
+            resolve(result)
+          })
+          .catch(reject)
+    })
+}
+
+export function addPipelineTask(transactionId, job, seq, type, completed, status, content){
+    return new Promise(async (resolve, reject) => {
+        await getConnection()
+          .then(async conn => {
+            var guid = v4() // generate guid
+  
+            var result = await conn.all(`insert into pipeline_tasks values (null, ?, ?, ?, ?, ?, ?, ?, ?, datetime('now'))`, [
+                guid,
+                transactionId,
+                job,
+                seq,
+                type,
+                completed,
+                status,
+                content
+            ])
+            conn.close()
+  
+            resolve(guid)
+          })
+          .catch(reject)
+    })
+}
+
+export function updatePipelineTask(guid, completed, status, content){
+    return new Promise(async (resolve, reject) => {
+        await getConnection()
+          .then(async conn => {
+            console.log(guid)
+            var result = await conn.all("update pipeline_tasks set completed = ?, status = ?, content = ?, lastUpdated = datetime('now') where guid = ?", [
+                completed, 
+                status,    
+                content,
+                guid
+            ])
+            conn.close()
+            
+            resolve()
+          })
+          .catch(reject)
+    })
+}

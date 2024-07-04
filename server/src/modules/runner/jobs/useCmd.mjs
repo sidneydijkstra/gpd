@@ -8,4 +8,6 @@ export function useCmd(config, logger){
     const child = spawnSync(command, [], { shell: true });
 
     logger.log(`useCmd result: `, child.stdout.toString(), child.stderr.toString());
+
+    return child.status == 0
 }

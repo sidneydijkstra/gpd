@@ -8,7 +8,6 @@ import { open } from 'sqlite'
     })
 
     await db.exec(`
-        DROP TABLE IF EXISTS repos;
         CREATE TABLE IF NOT EXISTS repos (
             id integer PRIMARY KEY AUTOINCREMENT,
             guid varchar(255),
@@ -18,7 +17,6 @@ import { open } from 'sqlite'
             lastUpdated time
         );
 
-        DROP TABLE IF EXISTS pipelines;
         CREATE TABLE IF NOT EXISTS pipelines (
             id integer PRIMARY KEY AUTOINCREMENT NOT NULL,
             guid varchar(255) NOT NULL,
@@ -29,7 +27,6 @@ import { open } from 'sqlite'
             FOREIGN KEY (repoId) REFERENCES repos(id) ON DELETE CASCADE
         );
         
-        DROP TABLE IF EXISTS pipeline_transactions;
         CREATE TABLE IF NOT EXISTS pipeline_transactions (
             id integer PRIMARY KEY AUTOINCREMENT NOT NULL,
             guid varchar(255) NOT NULL,
@@ -42,6 +39,20 @@ import { open } from 'sqlite'
             lastUpdated time NOT NULL,
             FOREIGN KEY (pipelineId) REFERENCES pipelines(id) ON DELETE CASCADE,
             FOREIGN KEY (repoId) REFERENCES repos(id) ON DELETE CASCADE
+        );
+
+        CREATE TABLE IF NOT EXISTS pipeline_tasks (
+            id integer PRIMARY KEY AUTOINCREMENT NOT NULL,
+            guid varchar(255) NOT NULL,
+            transactionId integer NOT NULL,
+            job varchar(255) NOT NULL,
+            seq integer NOT NULL,
+            type varchar(255) NOT NULL,
+            completed boolean NOT NULL,
+            status varchar(255) NOT NULL,
+            content text,
+            lastUpdated time NOT NULL,
+            FOREIGN KEY (transactionId) REFERENCES pipeline_transactions(id) ON DELETE CASCADE
         );
     `)
 })()

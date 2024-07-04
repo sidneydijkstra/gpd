@@ -9,11 +9,11 @@ export function spawnRunner(transactionGuid, repoGuid, pipelineGuid){
     const child = spawn(command, [], { shell: true, cwd: process.cwd()})
 
     child.stdout.on('data', (data) => {
-        console.log(`child stdout:\n${data}`);
+        console.log(`child stdout: ${data}`);
     });
     
     child.stderr.on('data', (data) => {
-        console.error(`child stderr:\n${data}`);
+        console.error(`child stderr: ${data}`);
     });
 
     child.on('close', (code) => {

@@ -1,5 +1,5 @@
 import { getRepositoryByGuid } from '../database/repositories.mjs';
-import { getPipelineByGuid } from '../database/pipelines.mjs';
+import { getPipelineByGuid, addPipelineTask, updatePipelineTask } from '../database/pipelines.mjs';
 import { prepareWorkerFolder, removeWorkerFolder } from '../fileClient.mjs';
 import { parseConfigFile, parseConfigString } from './configParser.mjs';
 import { jobs as storedJobs } from './jobs/index.mjs';
@@ -39,19 +39,39 @@ export async function runConfig(repoGuid, pipelineGuid){
         
         var jobs = parsedConfig.jobs;
 
-        jobs.forEach(job => {
+        console.log(jobs)
+        // Run each job
+        for (var job of jobs){
             logger.log(`Running job ${job.name}`)
             var tasks = job.tasks;
 
-            tasks.forEach(task => {
+            // Create a sequence number for the tasks
+            var seq = 0
+            console.log(tasks)
+            // Run each task
+            for(const task of tasks){
                 logger.log(`Running task ${task.name}`)
+
+                // Start to record the logger
+                logger.record()
+                
+                // Add the task to the database
+                var guid = await addPipelineTask(pipeline.id, job.name, seq, task.name, false, 'Running', '')
+
+                // Run the job
+                var taskResult = false
                 if(storedJobs.hasOwnProperty(task.name)){
-                    storedJobs[task.name](task, logger)
+                    taskResult = storedJobs[task.name](task, logger)
                 } else {
-                    logger.error(`Job ${task.name} not found`)
+                    logger.log(`Job ${task.name} not found`)
                 }
-            });
-        });
+                
+                // Update the task in the database
+                await updatePipelineTask(guid, true, taskResult ? 'Completed' : 'Failed', logger.recordResult())
+                // Increment the sequence number
+                seq++
+            }
+        }
 
         if (!DEBUG_MODE) removeWorkerFolder(repo.guid)
         

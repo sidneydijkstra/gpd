@@ -3,6 +3,7 @@ import fs from 'fs';
 export class FileLogger {
   constructor(filePath) {
     this.filePath = filePath;
+    this.recording = '';
   }
 
   log(...messages) {
@@ -12,10 +13,20 @@ export class FileLogger {
 
     // Append the log messages to the file
     try {
+      var message = `${timestamp}: ` + logMessages.join('') + '\n'
+      this.recording += message;
       fs.appendFileSync(this.filePath, `${timestamp}: ` + logMessages.join('') + '\n');
     } catch (error) {
-      console.error('Error writing to log file:', error);
+      console.log('Error writing to log file:', error);
     }
+  }
+
+  record(){
+    this.recording = '';
+  }
+
+  recordResult(){
+    return this.recording;
   }
 
   error(...messages) {
