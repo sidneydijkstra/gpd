@@ -140,7 +140,7 @@ export function updatePipelineTransaction(guid, completed, status, content){
             var result = await conn.all("update pipeline_transactions set completed = ?, status = ?, content = ?, lastUpdated = datetime('now') where guid = ?", [
                 completed, 
                 status,    
-                JSON.stringify(content),
+                content,
                 guid
             ])
             conn.close()
@@ -156,6 +156,19 @@ export function getPipelineTasks(transactionId){
         await getConnection()
           .then(async conn => {
             var result = await conn.all('select * from pipeline_tasks where transactionId = ?', transactionId)
+            conn.close()
+
+            resolve(result)
+          })
+          .catch(reject)
+    })
+}
+
+export function getPipelineTaskByGuid(guid){
+    return new Promise(async (resolve, reject) => {
+        await getConnection()
+          .then(async conn => {
+            var result = await conn.get('select * from pipeline_tasks where guid = ?', guid)
             conn.close()
 
             resolve(result)

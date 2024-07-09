@@ -57,22 +57,24 @@ export async function runConfig(repoGuid, pipelineGuid, transactionGuid){
             // Run each task
             for(const task of tasks){
                 logger.log(`Running task ${task.name}`)
-
-                // Start to record the logger
-                logger.record()
                 
                 // Add the task to the database
                 var guid = await addPipelineTask(pipeline.id, job.name, seq, task.name, false, pipelineTaskStatus.running, '')
                 
                 mqttClient.publish(`pipe/${pipeline.guid}/trans/${transactionGuid}/task/${guid}`, pipelineTaskStatus.running)
                 
+                // Delay for debugging
                 await new Promise(r => setTimeout(r, 2000));
+                // Create task logger
+                var taskLogger = new FileLogger(`${folderPath}/log.txt`)
+                // Start to record the logger
+                taskLogger.record()
 
                 // Run the job
                 var taskResult = false
                 if(storedJobs.hasOwnProperty(task.name)){
                     try {
-                        taskResult = await storedJobs[task.name](task, logger)
+                        taskResult = await storedJobs[task.name](task, taskLogger)
                     } catch (error) {
                         logger.log(`Error running job ${task.name}: ${error}`)
                     }
@@ -82,7 +84,7 @@ export async function runConfig(repoGuid, pipelineGuid, transactionGuid){
                 
                 var taskStatus = taskResult ? pipelineTaskStatus.completed : pipelineTaskStatus.failed
                 // Update the task in the database
-                await updatePipelineTask(guid, true, taskStatus, logger.recordResult())
+                await updatePipelineTask(guid, true, taskStatus, taskLogger.recordResult())
                 
                 mqttClient.publish(`pipe/${pipeline.guid}/trans/${transactionGuid}/task/${guid}`, taskStatus)
 
@@ -92,11 +94,11 @@ export async function runConfig(repoGuid, pipelineGuid, transactionGuid){
         }
 
         if (!DEBUG_MODE) removeWorkerFolder(repo.guid)
-        
-        // Complete the transaction
-        await updatePipelineTransaction(transactionGuid, true, pipelineStatus.completed, '')
 
         mqttClient.publish(`pipe/${pipeline.guid}/trans/${transactionGuid}`, pipelineStatus.completed)
+        
+        // Complete the transaction
+        await updatePipelineTransaction(transactionGuid, true, pipelineStatus.completed, 'Y')
 
         // Resolve the promise
         resolve()

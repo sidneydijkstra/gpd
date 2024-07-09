@@ -1,6 +1,6 @@
 import express from 'express'
 import { getRepositoryByGuid, getRepositoryById } from '../modules/database/repositories.mjs'
-import { getPipelinesByRepository, getPipelineByGuid, addPipeline, updatePipeline, removePipeline, getPipelineTransactions, addPipelineTransaction } from '../modules/database/pipelines.mjs'
+import { getPipelinesByRepository, getPipelineByGuid, addPipeline, updatePipeline, removePipeline, getPipelineTransactions, addPipelineTransaction, getPipelineTasks, getPipelineTaskByGuid } from '../modules/database/pipelines.mjs'
 import pipelineStatus from '../enums/pipelineStatus.mjs'
 
 import { spawnRunner } from '../modules/runner/spawnRunner.mjs'
@@ -105,6 +105,30 @@ router.get('/api/pipeline/:guid/transaction', async (req, res) => {
 
     var transactions = await getPipelineTransactions(pipeline.id)
     res.status(200).json(transactions)
+})
+
+
+router.get('/api/pipeline/:guid/transaction/:transactionGuid/task', async (req, res) => {
+    var pipeline = await getPipelineByGuid(req.params.guid)
+    if(pipeline == null){
+        res.status(404).json({message: 'Pipeline not found'})
+        return
+    }
+
+    var tasks = await getPipelineTasks(req.params.transactionGuid)
+    res.status(200).json(tasks)
+})
+
+
+router.get('/api/pipeline/:guid/transaction/:transactionGuid/task/:taskGuid', async (req, res) => {
+    var pipeline = await getPipelineByGuid(req.params.guid)
+    if(pipeline == null){
+        res.status(404).json({message: 'Pipeline not found'})
+        return
+    }
+
+    var task = await getPipelineTaskByGuid(req.params.transactionGuid)
+    res.status(200).json(task)
 })
 
 export default router

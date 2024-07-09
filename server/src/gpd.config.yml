@@ -8,5 +8,5 @@ jobs:
         title: 'Run npm command'
         command: 'npm --version'
       - name: 'useCmd'
-        title: 'Run npm command'
-        command: 'npm --version'
+        title: 'Run tree'
+        command: 'tree'
