@@ -45,6 +45,10 @@ async function onClickDelete(){
         })
 }
 
+function onSelectTable(selected){
+    router.push(`/pipe/${route.params.guid}/trans/${route.params.pipeGuid}/tasks/${selected.guid}`)
+}
+
 async function reload(){
     isLoading.value = true
     await getRepositoryByGuid(route.params.guid)
@@ -124,7 +128,9 @@ onBeforeMount(async () => {
                 :key="transactions" 
                 :data="transactions" 
                 :scroll="true"
+                :select="true"
                 include="['type', 'status', 'lastUpdated']"
+                v-on:onSelect="onSelectTable"
             />
         </template>
         <template v-else>

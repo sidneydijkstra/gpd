@@ -109,6 +109,19 @@ export function getPipelineTransactions(pipeId){
     })
 }
 
+export function getPipelineTransactionByGuid(guid){
+    return new Promise(async (resolve, reject) => {
+        await getConnection()
+          .then(async conn => {
+            var result = await conn.get('select * from pipeline_transactions where guid = ?', guid)
+            conn.close()
+
+            resolve(result)
+          })
+          .catch(reject)
+    })
+}
+
 export function addPipelineTransaction(pipelineId, repoId, type, completed, status, content){
     return new Promise(async (resolve, reject) => {
         await getConnection()

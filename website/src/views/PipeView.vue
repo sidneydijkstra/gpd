@@ -17,7 +17,7 @@ function navigateToEdit(){
 }
 
 function onSelectTable(selected){
-  router.push(`/pipe/${route.params.guid}/view/${selected.guid}`)
+  router.push(`/pipe/${route.params.guid}/trans/${selected.guid}`)
 }
 
 async function reload(){

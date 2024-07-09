@@ -1,5 +1,5 @@
 import { getRepositoryByGuid } from '../database/repositories.mjs';
-import { getPipelineByGuid, addPipelineTask, updatePipelineTask, updatePipelineTransaction } from '../database/pipelines.mjs';
+import { getPipelineByGuid, getPipelineTransactionByGuid, addPipelineTask, updatePipelineTask, updatePipelineTransaction } from '../database/pipelines.mjs';
 import useMqttClient from '../mqtt/mqttClient.mjs';
 import pipelineStatus from '../../enums/pipelineStatus.mjs';
 import pipelineTaskStatus from '../../enums/pipelineTaskStatus.mjs';
@@ -23,6 +23,13 @@ export async function runConfig(repoGuid, pipelineGuid, transactionGuid){
         var pipeline = await getPipelineByGuid(pipelineGuid)
         if(pipeline == null){
             reject('Pipeline not found')
+            return
+        }
+
+        // Get the transaction
+        var transaction = await getPipelineTransactionByGuid(transactionGuid)
+        if(transaction == null){
+            reject('Transaction not found')
             return
         }
 
@@ -59,7 +66,7 @@ export async function runConfig(repoGuid, pipelineGuid, transactionGuid){
                 logger.log(`Running task ${task.name}`)
                 
                 // Add the task to the database
-                var guid = await addPipelineTask(pipeline.id, job.name, seq, task.name, false, pipelineTaskStatus.running, '')
+                var guid = await addPipelineTask(transaction.id, job.name, seq, task.name, false, pipelineTaskStatus.running, '')
                 
                 mqttClient.publish(`pipe/${pipeline.guid}/trans/${transactionGuid}/task/${guid}`, pipelineTaskStatus.running)
                 

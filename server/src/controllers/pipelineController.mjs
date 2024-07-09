@@ -1,6 +1,6 @@
 import express from 'express'
 import { getRepositoryByGuid, getRepositoryById } from '../modules/database/repositories.mjs'
-import { getPipelinesByRepository, getPipelineByGuid, addPipeline, updatePipeline, removePipeline, getPipelineTransactions, addPipelineTransaction, getPipelineTasks, getPipelineTaskByGuid } from '../modules/database/pipelines.mjs'
+import { getPipelinesByRepository, getPipelineByGuid, addPipeline, updatePipeline, removePipeline, getPipelineTransactions, addPipelineTransaction, getPipelineTasks, getPipelineTaskByGuid, getPipelineTransactionByGuid } from '../modules/database/pipelines.mjs'
 import pipelineStatus from '../enums/pipelineStatus.mjs'
 
 import { spawnRunner } from '../modules/runner/spawnRunner.mjs'
@@ -114,8 +114,14 @@ router.get('/api/pipeline/:guid/transaction/:transactionGuid/task', async (req, 
         res.status(404).json({message: 'Pipeline not found'})
         return
     }
+    
+    var transaction = await getPipelineTransactionByGuid(req.params.transactionGuid)
+    if(transaction == null){
+        res.status(404).json({message: 'Transaction not found'})
+        return
+    }
 
-    var tasks = await getPipelineTasks(req.params.transactionGuid)
+    var tasks = await getPipelineTasks(transaction.id)
     res.status(200).json(tasks)
 })
 

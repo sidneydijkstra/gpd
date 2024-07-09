@@ -73,3 +73,7 @@ export async function deletePipeline(guid){
 export async function getPipelineTransactions(guid){
     return apiClient.pipeline[`${guid}`].transaction.get()
 }
+
+export async function getPipelineTasks(pipelineGuid, transactionGuid){
+    return apiClient.pipeline[`${pipelineGuid}`].transaction[`${transactionGuid}`].task.get()
+}
