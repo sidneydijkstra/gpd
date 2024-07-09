@@ -1,5 +1,6 @@
 import { getRepositoryByGuid } from '../database/repositories.mjs';
 import { getPipelineByGuid, addPipelineTask, updatePipelineTask, updatePipelineTransaction } from '../database/pipelines.mjs';
+import useMqttClient from '../mqtt/mqttClient.mjs';
 import pipelineStatus from '../../enums/pipelineStatus.mjs';
 import pipelineTaskStatus from '../../enums/pipelineTaskStatus.mjs';
 import { prepareWorkerFolder, removeWorkerFolder } from '../fileClient.mjs';
@@ -32,6 +33,10 @@ export async function runConfig(repoGuid, pipelineGuid, transactionGuid){
         // Log the start of the job
         logger.log(`Running pipeline ${pipeline.guid} for repository ${repo.username}/${repo.repository}`)
 
+        const mqttClient = useMqttClient()
+
+        mqttClient.publish(`pipe/${pipeline.guid}/trans/${transactionGuid}`, pipelineStatus.running)
+
         // Escape the config file
         var config = pipeline.content.replace(/\\n/g, '\n').replace(/\\"/g, '\"').slice(1,-1)
         // Parse the config file
@@ -58,17 +63,29 @@ export async function runConfig(repoGuid, pipelineGuid, transactionGuid){
                 
                 // Add the task to the database
                 var guid = await addPipelineTask(pipeline.id, job.name, seq, task.name, false, pipelineTaskStatus.running, '')
+                
+                mqttClient.publish(`pipe/${pipeline.guid}/trans/${transactionGuid}/task/${guid}`, pipelineTaskStatus.running)
+                
+                await new Promise(r => setTimeout(r, 2000));
 
                 // Run the job
                 var taskResult = false
                 if(storedJobs.hasOwnProperty(task.name)){
-                    taskResult = storedJobs[task.name](task, logger)
+                    try {
+                        taskResult = await storedJobs[task.name](task, logger)
+                    } catch (error) {
+                        logger.log(`Error running job ${task.name}: ${error}`)
+                    }
                 } else {
                     logger.log(`Job ${task.name} not found`)
                 }
                 
+                var taskStatus = taskResult ? pipelineTaskStatus.completed : pipelineTaskStatus.failed
                 // Update the task in the database
-                await updatePipelineTask(guid, true, taskResult ? pipelineTaskStatus.completed : pipelineTaskStatus.failed, logger.recordResult())
+                await updatePipelineTask(guid, true, taskStatus, logger.recordResult())
+                
+                mqttClient.publish(`pipe/${pipeline.guid}/trans/${transactionGuid}/task/${guid}`, taskStatus)
+
                 // Increment the sequence number
                 seq++
             }
@@ -78,6 +95,8 @@ export async function runConfig(repoGuid, pipelineGuid, transactionGuid){
         
         // Complete the transaction
         await updatePipelineTransaction(transactionGuid, true, pipelineStatus.completed, '')
+
+        mqttClient.publish(`pipe/${pipeline.guid}/trans/${transactionGuid}`, pipelineStatus.completed)
 
         // Resolve the promise
         resolve()

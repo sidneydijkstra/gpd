@@ -7,3 +7,6 @@ jobs:
       - name: 'useCmd'
         title: 'Run npm command'
         command: 'npm --version'
+      - name: 'useCmd'
+        title: 'Run npm command'
+        command: 'npm --version'

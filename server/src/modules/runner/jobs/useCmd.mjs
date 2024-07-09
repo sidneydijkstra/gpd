@@ -1,6 +1,6 @@
 import { spawnSync } from 'child_process';
 
-export function useCmd(config, logger){
+export async function useCmd(config, logger){
     logger.log(`Running job useCmd with config: `, config)
 
     var command = config.command
