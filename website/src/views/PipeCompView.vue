@@ -1,7 +1,7 @@
 <script setup>
 import SideMenu from '@/components/SideMenu.vue'
 import DynamicTable from '@/components/Utilities/DynamicTable.vue'
-import { onBeforeMount, onMounted, ref, watch } from 'vue';
+import { onBeforeMount, onMounted, ref, watch, computed } from 'vue';
 import { useRoute, useRouter } from 'vue-router'
 import { getRepositoryByGuid, getPipelineByGuid, getPipelineTransactions, runPipeline, deletePipeline } from '@/modules/serverApi.js'
 
@@ -78,7 +78,7 @@ async function reload(){
 }
 
 onBeforeMount(async () => {
-  await reload()
+    await reload()
 });
 </script>
 

@@ -1,13 +1,15 @@
 import { getRepositoryByGuid } from '../database/repositories.mjs';
-import { getPipelineByGuid, addPipelineTask, updatePipelineTask } from '../database/pipelines.mjs';
+import { getPipelineByGuid, addPipelineTask, updatePipelineTask, updatePipelineTransaction } from '../database/pipelines.mjs';
+import pipelineStatus from '../../enums/pipelineStatus.mjs';
+import pipelineTaskStatus from '../../enums/pipelineTaskStatus.mjs';
 import { prepareWorkerFolder, removeWorkerFolder } from '../fileClient.mjs';
-import { parseConfigFile, parseConfigString } from './configParser.mjs';
+import { parseConfigString } from './configParser.mjs';
 import { jobs as storedJobs } from './jobs/index.mjs';
 import { FileLogger } from './logger.mjs';
 
 const DEBUG_MODE = true
 
-export async function runConfig(repoGuid, pipelineGuid){
+export async function runConfig(repoGuid, pipelineGuid, transactionGuid){
     return new Promise(async (resolve, reject) => {
         // Get the repository
         var repo = await getRepositoryByGuid(repoGuid)
@@ -37,17 +39,16 @@ export async function runConfig(repoGuid, pipelineGuid){
         
         logger.log(`Config parsed`)
         
+        // Get all jobs
         var jobs = parsedConfig.jobs;
 
-        console.log(jobs)
+        // Create a sequence number for the tasks
+        var seq = 0
         // Run each job
         for (var job of jobs){
             logger.log(`Running job ${job.name}`)
             var tasks = job.tasks;
 
-            // Create a sequence number for the tasks
-            var seq = 0
-            console.log(tasks)
             // Run each task
             for(const task of tasks){
                 logger.log(`Running task ${task.name}`)
@@ -56,7 +57,7 @@ export async function runConfig(repoGuid, pipelineGuid){
                 logger.record()
                 
                 // Add the task to the database
-                var guid = await addPipelineTask(pipeline.id, job.name, seq, task.name, false, 'Running', '')
+                var guid = await addPipelineTask(pipeline.id, job.name, seq, task.name, false, pipelineTaskStatus.running, '')
 
                 // Run the job
                 var taskResult = false
@@ -67,7 +68,7 @@ export async function runConfig(repoGuid, pipelineGuid){
                 }
                 
                 // Update the task in the database
-                await updatePipelineTask(guid, true, taskResult ? 'Completed' : 'Failed', logger.recordResult())
+                await updatePipelineTask(guid, true, taskResult ? pipelineTaskStatus.completed : pipelineTaskStatus.failed, logger.recordResult())
                 // Increment the sequence number
                 seq++
             }
@@ -75,6 +76,9 @@ export async function runConfig(repoGuid, pipelineGuid){
 
         if (!DEBUG_MODE) removeWorkerFolder(repo.guid)
         
+        // Complete the transaction
+        await updatePipelineTransaction(transactionGuid, true, pipelineStatus.completed, '')
+
         // Resolve the promise
         resolve()
     })
