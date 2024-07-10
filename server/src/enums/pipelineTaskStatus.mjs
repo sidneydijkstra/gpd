@@ -1,4 +1,5 @@
 const pipelineTaskStatus = {
+    pending: 'Pending',
     running: 'Running',
     completed: 'Completed',
     failed: 'Failed',

@@ -52,27 +52,42 @@ export async function runConfig(repoGuid, pipelineGuid, transactionGuid){
         
         logger.log(`Config parsed`)
         
+        // Create all task transactions
+        var taskTransactionGuids = []
+        for (var job of parsedConfig.jobs){
+            // Create a sequence number for the tasks
+            var seq = 0
+            for (var task of job.tasks){
+                var guid = await addPipelineTask(transaction.id, job.name, seq, task.title, task.name, false, pipelineTaskStatus.pending, '')
+                taskTransactionGuids.push(guid)
+                // Increment the sequence number
+                seq++
+            }
+        }
+
+        logger.log(`Tasks created`)
+        
         // Create mqqt client and publish the start of the pipeline
         const mqttClient = useMqttClient()
         mqttClient.publish(`pipe/${pipeline.guid}/trans/${transactionGuid}`, pipelineStatus.running)
         
+        logger.log(`Connected with server`)
+        
         // Get all jobs
         var jobs = parsedConfig.jobs;
 
-        // Create a sequence number for the tasks
-        var seq = 0
         // Run each job
         for (var job of jobs){
             logger.log(`Running job ${job.name}`)
             var tasks = job.tasks;
 
             // Run each task
-            for(const task of tasks){
+            for(var task of tasks){
                 logger.log(`Running task ${task.name}`)
                 
-                // Add the task to the database
-                var guid = await addPipelineTask(transaction.id, job.name, seq, task.title, task.name, false, pipelineTaskStatus.running, '')
-                
+                // Update the task in the database
+                await updatePipelineTask(taskTransactionGuids[0], true, pipelineTaskStatus.running, '')
+                // Publish the task status
                 mqttClient.publish(`pipe/${pipeline.guid}/trans/${transactionGuid}/task/${guid}`, pipelineTaskStatus.running)
                 
                 // Delay for debugging
@@ -96,12 +111,11 @@ export async function runConfig(repoGuid, pipelineGuid, transactionGuid){
                 
                 var taskStatus = taskResult ? pipelineTaskStatus.completed : pipelineTaskStatus.failed
                 // Update the task in the database
-                await updatePipelineTask(guid, true, taskStatus, taskLogger.recordResult())
-                
+                await updatePipelineTask(taskTransactionGuids[0], true, taskStatus, taskLogger.recordResult())
+                // Remove the task from the array
+                taskTransactionGuids.shift()
+                // Publish the task status
                 mqttClient.publish(`pipe/${pipeline.guid}/trans/${transactionGuid}/task/${guid}`, taskStatus)
-
-                // Increment the sequence number
-                seq++
             }
         }
 
