@@ -10,7 +10,10 @@
   "dependencies": {
     "@fortawesome/free-solid-svg-icons": "^6.5.2",
     "@fortawesome/vue-fontawesome": "^3.0.8",
+    "@primevue/themes": "^4.0.0",
     "mqtt": "^5.8.0",
+    "primeicons": "^7.0.0",
+    "primevue": "^4.0.0",
     "vue": "^3.4.21",
     "vue-router": "^4.4.0"
   },

@@ -1,9 +1,9 @@
 <script setup>
-import SideMenu from '@/components/SideMenu.vue'
 import DynamicTable from '@/components/Utilities/DynamicTable.vue'
 import { onBeforeMount, ref} from 'vue';
 import { useRoute, useRouter } from 'vue-router'
 import { getRepositoryByGuid, getPipelineByGuid, getPipelineTasks } from '@/modules/serverApi.js'
+import pipelineTaskStatus from '@/enums/pipelineTaskStatus.js'
 
 const route = useRoute()
 const router = useRouter()
@@ -14,10 +14,13 @@ const pipeline = ref(null)
 const tasks = ref(null)
 const selectedTask = ref(null)
 
-async function onSelectTable(selected){
-    selected.content = selected.content.replace(/\\n/g, '\n').replace(/\\"/g, '\"').slice(1,-1)
-    console.log(selected)
-    selectedTask.value = selected
+function onNavigateBack(){
+    router.push(`/pipe/${route.params.guid}/trans/${route.params.pipeGuid}`)
+}
+
+async function onClickTask(task){
+    console.log(task)
+    selectedTask.value = task
 }
 
 async function reload(){
@@ -43,6 +46,9 @@ async function reload(){
     await getPipelineTasks(route.params.pipeGuid, route.params.transGuid)
         .then(response => {
             tasks.value = response
+            if(response.length > 0){
+                selectedTask.value = response[0]
+            }
         })
         .catch(error => {
             console.log(error)
@@ -58,65 +64,40 @@ onBeforeMount(async () => {
 </script>
 
 <template>
-  <div v-if="!isLoading" class="row justify-content-center">
-
-    <div class="col-4">
-      <SideMenu />
-    </div>
-
-    <div class="col-6" v-if="!isLoading">
-        <div class="d-flex align-items-center">
-        <fa-icon icon="fa-solid fa-file" size="2x" />
-        <h2>&nbsp;{{ repo.content.full_name }}</h2>
-        </div>
-        <hr>
-
-        <div class="d-flex justify-content-between">
-            <div>
-                <h3>{{ pipeline.name }}</h3>    
-            </div>
-
-            <div>
-                <div class="input-group">
-                    <button type="button" class="btn btn-outline-secondary" v-on:click="onClickRun">X Tasks</button>
-                    <button type="button" class="btn btn-outline-secondary dropdown-toggle dropdown-toggle-split" data-bs-toggle="dropdown" aria-expanded="false">
-                        <span class="visually-hidden">Toggle Dropdown</span>
-                    </button>
-                    <ul class="dropdown-menu dropdown-menu-end">
-                        <li><a class="dropdown-item">Run Pipeline</a></li>
-                        <li><a class="dropdown-item">Edit Pipeline</a></li>
-                        <li><hr class="dropdown-divider"></li>
-                        <li><a class="dropdown-item">Delete</a></li>
-                    </ul>
+  <div v-if="!isLoading">
+    <Card>
+        <template #title><Button icon="pi pi-arrow-left"  size="small" severity="secondary" v-on:click="onNavigateBack" text /> {{ repo.content.full_name }}</template>
+        <template #content>
+            <div class="row p-0 m-0">
+                <div class="col-4">
+                    <h5><b>Tasks</b></h5>
+                    <div v-for="task in tasks" class="m-1">
+                        <Panel :collapsed="true" toggleable v-on:click="onClickTask(task)">
+                            <template #header>
+                                <span>{{ task.title }}</span>
+                            </template>
+                            <template #icons>
+                                <ProgressSpinner v-if="task.status == pipelineTaskStatus.running" style="width: 1rem; height: 1rem; color: white !important" strokeWidth="8" />
+                                <i v-else-if="task.status == pipelineTaskStatus.completed" class="pi pi-check-circle" style="font-size: 1rem"></i>
+                                <i v-else-if="task.status == pipelineTaskStatus.failed" class="pi pi-times-circle" style="font-size: 1rem"></i>
+                                &nbsp;
+                            </template>
+                            <div class="flex flex-row">
+                                <p class="font-bold m-0">Type: {{ task.type }}</p>
+                                <p class="font-bold">Status: {{ task.status }}</p>
+                                <small class="m-0">Updated 2 hours ago</small>
+                            </div>
+                        </Panel>
+                    </div>
+                </div>
+                
+                <div class="col-8" v-if="selectedTask != null">
+                    <h4>{{ selectedTask.type }} - {{ selectedTask.title }}</h4>
+                    <Textarea style="width: 100%;font-size: 12px;" rows="40" v-model="selectedTask.content" spellcheck="false"></Textarea>
                 </div>
             </div>
-        </div>
-
-
-        <!-- Transaction table -->
-        <template v-if="tasks != []">
-            <DynamicTable 
-                :key="tasks" 
-                :data="tasks" 
-                :scroll="true"
-                :select="true"
-                include="['type', 'status', 'lastUpdated']"
-                v-on:onSelect="onSelectTable"
-            />
         </template>
-        <template v-else>
-            <p>No tasks</p>
-        </template>
-        <br>
-        <div class="row">
-            <div class="col-12" v-if="selectedTask != null">
-                <h4>{{ selectedTask.type }}</h4>
-                <textarea style="white-space: pre-wrap;width: 100%;" rows="16" v-model="selectedTask.content" spellcheck="false"></textarea>
-            </div>
-        </div>
-
-    </div>
-
+    </Card>
   </div>
   <div v-else>
     <p>loading</p>

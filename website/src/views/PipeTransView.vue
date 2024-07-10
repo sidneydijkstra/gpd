@@ -1,9 +1,9 @@
 <script setup>
-import SideMenu from '@/components/SideMenu.vue'
-import DynamicTable from '@/components/Utilities/DynamicTable.vue'
 import { onBeforeMount, onMounted, ref, watch, computed } from 'vue';
 import { useRoute, useRouter } from 'vue-router'
+import { useConfirm } from "primevue/useconfirm";
 import { getRepositoryByGuid, getPipelineByGuid, getPipelineTransactions, runPipeline, deletePipeline } from '@/modules/serverApi.js'
+import pipelineStatus from '@/enums/pipelineStatus.js'
 
 const route = useRoute()
 const router = useRouter()
@@ -12,6 +12,35 @@ const isLoading = ref(true)
 const repo = ref(null)
 const pipeline = ref(null)
 const transactions = ref(null)
+
+// Variables for popup
+const confirm = useConfirm();
+const isVisible = ref(false);
+
+const dropdownItems = [
+    { label: 'Run Pipeline', icon: 'pi pi-fw pi-play', command: () => onClickRun() },
+    { label: 'Edit Pipeline', icon: 'pi pi-fw pi-pencil', command: () => onClickEdit() },
+    { separator: true },
+    { label: 'Delete', icon: 'pi pi-fw pi-trash', command: () => openDeletePopup() }
+]
+
+function onNavigateBack(){
+    router.push(`/pipe/${route.params.guid}`)
+}
+
+function openDeletePopup(event) {
+    confirm.require({
+        message: 'Are you sure you want to delete this pipeline?',
+        header: 'Confirmation',
+        accept: () => onClickDelete(),
+        onShow: () => {
+            isVisible.value = true;
+        },
+        onHide: () => {
+            isVisible.value = false;
+        }
+    });
+}
 
 async function onClickRun(){
     await runPipeline(route.params.pipeGuid)
@@ -46,7 +75,7 @@ async function onClickDelete(){
 }
 
 function onSelectTable(selected){
-    router.push(`/pipe/${route.params.guid}/trans/${route.params.pipeGuid}/tasks/${selected.guid}`)
+    router.push(`/pipe/${route.params.guid}/trans/${route.params.pipeGuid}/tasks/${selected.data.guid}`)
 }
 
 async function reload(){
@@ -87,58 +116,40 @@ onBeforeMount(async () => {
 </script>
 
 <template>
-  <div v-if="!isLoading" class="row justify-content-center">
-
-    <div class="col-4">
-      <SideMenu />
-    </div>
-
-    <div class="col-6" v-if="!isLoading">
-        <div class="d-flex align-items-center">
-        <fa-icon icon="fa-solid fa-file" size="2x" />
-        <h2>&nbsp;{{ repo.content.full_name }}</h2>
-        </div>
-        <hr>
-
-        <div class="d-flex justify-content-between">
-            <div>
-                <h3>{{ pipeline.name }}</h3>    
-            </div>
-
-            <div>
-                <div class="input-group">
-                    <button type="button" class="btn btn-outline-secondary" v-on:click="onClickRun">Run Pipeline</button>
-                    <button type="button" class="btn btn-outline-secondary dropdown-toggle dropdown-toggle-split" data-bs-toggle="dropdown" aria-expanded="false">
-                        <span class="visually-hidden">Toggle Dropdown</span>
-                    </button>
-                    <ul class="dropdown-menu dropdown-menu-end">
-                        <li><a class="dropdown-item" v-on:click="onClickRun">Run Pipeline</a></li>
-                        <li><a class="dropdown-item" v-on:click="onClickEdit">Edit Pipeline</a></li>
-                        <li><hr class="dropdown-divider"></li>
-                        <li><a class="dropdown-item" v-on:click="onClickDelete">Delete</a></li>
-                    </ul>
+  <div v-if="!isLoading" class="row justify-content-center p-0 m-0">
+    <Card>
+      <template #title><Button icon="pi pi-arrow-left"  size="small" severity="secondary" v-on:click="onNavigateBack" text /> {{ repo.content.full_name }}</template>
+      <template #content>
+            <div class="d-flex justify-content-between">
+                <div>
+                    <h5>{{ pipeline.name }}</h5>    
                 </div>
+
+                <ConfirmDialog>
+                    <template #accepticon>
+                        Yes
+                    </template>
+                    <template #rejecticon>
+                        No
+                    </template>
+                </ConfirmDialog>
+                <SplitButton label="Run" @click="onClickRun" :model="dropdownItems" severity="secondary" />
             </div>
-        </div>
 
-
-        <!-- Transaction table -->
-        <template v-if="transactions != []">
-            <DynamicTable 
-                :key="transactions" 
-                :data="transactions" 
-                :scroll="true"
-                :select="true"
-                include="['type', 'status', 'lastUpdated']"
-                v-on:onSelect="onSelectTable"
-            />
-        </template>
-        <template v-else>
-            <p>No transactions</p>
-        </template>
-
-    </div>
-
+            <DataTable :value="transactions" selectionMode="single" tableStyle="min-width: 50rem" @rowSelect="onSelectTable">
+                <Column field="type" header="Type"></Column>
+                <Column field="status" header="Status"></Column>
+                <Column field="lastUpdated" header="Updated At"></Column>
+                <Column field="price" header="">
+                    <template #body="slotProps">
+                        <ProgressSpinner v-if="slotProps.data.status == pipelineStatus.running" style="width: 1rem; height: 1rem; color: white !important" strokeWidth="8" />
+                        <i v-else-if="slotProps.data.status == pipelineStatus.completed" class="pi pi-check-circle" style="font-size: 1rem"></i>
+                        <i v-else-if="slotProps.data.status == pipelineStatus.failed" class="pi pi-times-circle" style="font-size: 1rem"></i>
+                    </template>
+                </Column>
+            </DataTable>
+      </template>
+    </Card>
   </div>
   <div v-else>
     <p>loading</p>

@@ -45,8 +45,8 @@ onMounted(async () => {
     <!-- Add repository card -->
     <div class="row justify-content-center">
         <div class="col-4">
-
-        <h1 class="text-center">Gitter</h1>
+        
+        <br>
         <p>Enter a username and repository name to add the repository to your list.</p>
         <div class="input-group mb-3">
             <input v-model="repoForm.username" type="text" class="form-control" placeholder="Username" aria-label="Username">

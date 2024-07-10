@@ -1,5 +1,4 @@
 <script setup>
-import SideMenu from '@/components/SideMenu.vue'
 import DynamicTable from '@/components/Utilities/DynamicTable.vue'
 import { onBeforeMount, onMounted, ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router'
@@ -17,7 +16,8 @@ function navigateToEdit(){
 }
 
 function onSelectTable(selected){
-  router.push(`/pipe/${route.params.guid}/trans/${selected.guid}`)
+  console.log(selected)
+  router.push(`/pipe/${route.params.guid}/trans/${selected.data.guid}`)
 }
 
 async function reload(){
@@ -26,6 +26,7 @@ async function reload(){
     .then(response => {
         response.content = JSON.parse(response.content)
         repo.value = response
+        console.log(response)
     })
     .catch(error => {
         console.log(error)
@@ -52,32 +53,20 @@ onBeforeMount(async () => {
 </script>
 
 <template>
-  <div v-if="!isLoading" class="row justify-content-center">
+  <div v-if="!isLoading" class="row justify-content-center m-0">
+    <Card>
+      <template #title>{{ repo.content.full_name }}</template>
+      <template #content>
+          <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+            <Button label="Create Pipeline" icon="pi pi-home" aria-label="Save" severity="secondary" v-on:click="navigateToEdit" />  
+          </div>
 
-    <div class="col-4">
-      <SideMenu />
-    </div>
-
-    <div class="col-6" v-if="!isLoading">
-      <div class="d-flex align-items-center">
-        <fa-icon icon="fa-solid fa-file" size="2x" />
-        <h2>&nbsp;{{ repo.content.full_name }}</h2>
-      </div>
-      <hr>
-      <button type="button" class="btn btn-dark" v-on:click="navigateToEdit">Create Pipeline</button>
-      <DynamicTable
-          :key="pipelines"
-          :data="pipelines"
-          :select="true"
-          :sort="false"
-          :search="false"
-          :scroll="true"
-          :pages="false"
-          :include="['name', 'lastUpdated']"
-          v-on:onSelect="onSelectTable"
-        />
-    </div>
-
+          <DataTable :value="pipelines" selectionMode="single" tableStyle="min-width: 50rem" @rowSelect="onSelectTable">
+              <Column field="name" header="Name"></Column>
+              <Column field="lastUpdated" header="Updated At"></Column>
+          </DataTable>
+      </template>
+    </Card>
   </div>
   <div v-else>
     <p>loading</p>

@@ -1,5 +1,4 @@
 <script setup>
-import SideMenu from '@/components/SideMenu.vue'
 import { onBeforeMount, onMounted, ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router'
 import { getRepositoryByGuid, updateRepository, deleteRepository, getFiles } from '@/modules/serverApi.js'
@@ -79,11 +78,6 @@ onBeforeMount(async () => {
 
 <template>
   <div v-if="!isLoading" class="row justify-content-center">
-
-    
-    <div class="col-4">
-      <SideMenu />
-    </div>
 
     <div class="col-6">
       <div class="d-flex align-items-center">

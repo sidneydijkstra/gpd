@@ -10,6 +10,15 @@ jobs:
       - name: 'useCmd'
         title: 'Run tree'
         command: 'tree'
+      - name: 'useCmd'
+        title: 'Run timeout'
+        command: 'timeout 2>NUL'
+      - name: 'useCmd'
+        title: 'Run npm command'
+        command: 'npm --version'
+      - name: 'useCmd'
+        title: 'Run timeout'
+        command: 'timeout 2'
 
 jobs:
   - name: 'CI for sidneydijkstra/Vueam'

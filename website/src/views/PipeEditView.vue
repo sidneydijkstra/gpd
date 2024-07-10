@@ -1,5 +1,4 @@
 <script setup>
-import SideMenu from '@/components/SideMenu.vue'
 import { onBeforeMount, ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router'
 import { getRepositoryByGuid, getPipelineByGuid, addPipeline, updatePipeline } from '@/modules/serverApi.js'
@@ -10,6 +9,14 @@ const router = useRouter()
 const isLoading = ref(true)
 const repo = ref(null)
 const pipeline = ref(null)
+
+function onNavigateBack(){
+    if(route.params.pipeGuid == null){
+      router.push(`/pipe/${route.params.guid}`)
+    } else {
+      router.push(`/pipe/${route.params.guid}/trans/${route.params.pipeGuid}`)
+    }
+}
 
 async function reload(){
     isLoading.value = true
@@ -90,27 +97,20 @@ onBeforeMount(async () => {
 </script>
 
 <template>
-  <div v-if="!isLoading" class="row justify-content-center">
+  <div v-if="!isLoading">
+    <Card>
+      <template #title><Button icon="pi pi-arrow-left" size="small" severity="secondary" v-on:click="onNavigateBack" text /> {{ repo.content.full_name }}</template>
+      <template #content>
+          <InputGroup>
+              <InputText placeholder="Pipeline Name" v-model="pipeline.name" />
+              <Button :label="`${route.params.pipeGuid == null ? 'Create' : 'Save'} Pipeline`" severity="secondary" v-on:click="createPipeline" />
+          </InputGroup>
 
-    <div class="col-4">
-      <SideMenu />
-    </div>
-
-    <div class="col-6">
-      <div class="d-flex align-items-center">
-        <fa-icon icon="fa-solid fa-file" size="2x" />
-        <h2>&nbsp;{{ repo.content.full_name }}</h2>
-      </div>
-      <hr>
-      <div class="input-group mb-3">
-        <input type="text" class="form-control" placeholder="Enter Pipeline Name" v-model="pipeline.name">
-        <button class="btn btn-outline-secondary" type="button" v-on:click="createPipeline">{{ route.params.pipeGuid == null ? 'Create' : 'Save' }}</button>
-      </div>
-      <div class="col-12">
-        <textarea style="white-space: pre-wrap;" rows="32" v-model="pipeline.content" spellcheck="false"></textarea>
-      </div>
-    </div>
-
+          <br>
+          
+          <Textarea style="width: 100%;font-size: 12px;" rows="30" v-model="pipeline.content" spellcheck="false"></Textarea>
+      </template>
+    </Card>
   </div>
   <div v-else>
     <p>loading</p>
