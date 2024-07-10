@@ -31,6 +31,5 @@ export async function useCmd(config, folderPath, logger){
         });
     }))
 
-    logger.log(result)
     return result
 }
