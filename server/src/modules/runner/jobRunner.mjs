@@ -40,16 +40,22 @@ export async function runConfig(repoGuid, pipelineGuid, transactionGuid){
         // Log the start of the job
         logger.log(`Running pipeline ${pipeline.guid} for repository ${repo.username}/${repo.repository}`)
 
-        const mqttClient = useMqttClient()
-
-        mqttClient.publish(`pipe/${pipeline.guid}/trans/${transactionGuid}`, pipelineStatus.running)
-
         // Escape the config file
         var jobConfig = pipeline.content.replace(/\\n/g, '\n').replace(/\\"/g, '\"').slice(1,-1)
-        // Parse the config file
-        var parsedConfig = parseConfigString(jobConfig)
+        try {
+            // Parse the config file
+            var parsedConfig = parseConfigString(jobConfig)
+        } catch (error) {
+            await updatePipelineTransaction(transactionGuid, true, pipelineStatus.failed, 'N')
+            reject('Error parsing config')
+            return
+        }
         
         logger.log(`Config parsed`)
+        
+        // Create mqqt client and publish the start of the pipeline
+        const mqttClient = useMqttClient()
+        mqttClient.publish(`pipe/${pipeline.guid}/trans/${transactionGuid}`, pipelineStatus.running)
         
         // Get all jobs
         var jobs = parsedConfig.jobs;
