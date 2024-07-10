@@ -186,17 +186,18 @@ export function getPipelineTaskByGuid(guid){
     })
 }
 
-export function addPipelineTask(transactionId, job, seq, type, completed, status, content){
+export function addPipelineTask(transactionId, job, seq, title, type, completed, status, content){
     return new Promise(async (resolve, reject) => {
         await getConnection()
           .then(async conn => {
             var guid = v4() // generate guid
   
-            var result = await conn.all(`insert into pipeline_tasks values (null, ?, ?, ?, ?, ?, ?, ?, ?, datetime('now'))`, [
+            var result = await conn.all(`insert into pipeline_tasks values (null, ?, ?, ?, ?, ?, ?, ?, ?, ?, datetime('now'))`, [
                 guid,
                 transactionId,
                 job,
                 seq,
+                title,
                 type,
                 completed,
                 status,

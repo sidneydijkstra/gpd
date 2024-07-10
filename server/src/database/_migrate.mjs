@@ -47,6 +47,7 @@ import { open } from 'sqlite'
             transactionId integer NOT NULL,
             job varchar(255) NOT NULL,
             seq integer NOT NULL,
+            title varchar(255) NOT NULL,
             type varchar(255) NOT NULL,
             completed boolean NOT NULL,
             status varchar(255) NOT NULL,

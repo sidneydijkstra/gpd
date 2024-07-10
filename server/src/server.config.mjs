@@ -1,5 +1,5 @@
 const config = {
-    defaultRepoFolderPath: './.rebpg',
+    defaultRepoFolderPath: './.regpd',
     defaultWorkerFolderPath: './.wogpd',
     defaultStorageFolderPath: './.stgpd',
     

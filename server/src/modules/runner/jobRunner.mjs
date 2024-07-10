@@ -66,7 +66,7 @@ export async function runConfig(repoGuid, pipelineGuid, transactionGuid){
                 logger.log(`Running task ${task.name}`)
                 
                 // Add the task to the database
-                var guid = await addPipelineTask(transaction.id, job.name, seq, task.name, false, pipelineTaskStatus.running, '')
+                var guid = await addPipelineTask(transaction.id, job.name, seq, task.title, task.name, false, pipelineTaskStatus.running, '')
                 
                 mqttClient.publish(`pipe/${pipeline.guid}/trans/${transactionGuid}/task/${guid}`, pipelineTaskStatus.running)
                 
