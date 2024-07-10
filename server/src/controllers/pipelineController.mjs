@@ -1,6 +1,6 @@
 import express from 'express'
 import { getRepositoryByGuid, getRepositoryById } from '../modules/database/repositories.mjs'
-import { getPipelinesByRepository, getPipelineByGuid, addPipeline, updatePipeline, removePipeline, getPipelineTransactions, addPipelineTransaction, getPipelineTasks, getPipelineTaskByGuid, getPipelineTransactionByGuid } from '../modules/database/pipelines.mjs'
+import { getPipelinesByRepository, getPipelineByGuid, addPipeline, updatePipeline, removePipeline, getPipelineTransactions, addPipelineTransaction, getPipelineTasks, getPipelineTaskByGuid, getPipelineTransactionByGuid, updatePipelineTransaction } from '../modules/database/pipelines.mjs'
 import pipelineStatus from '../enums/pipelineStatus.mjs'
 
 import { spawnRunner } from '../modules/runner/spawnRunner.mjs'
@@ -22,7 +22,9 @@ router.post('/api/pipeline/:guid/run', async (req, res) => {
 
     await addPipelineTransaction(pipeline.id, repository.id, 'Manual Run', false, pipelineStatus.running, '')
         .then(async response => {
-            spawnRunner(response, repository.guid, pipeline.guid)
+            spawnRunner(response, repository.guid, pipeline.guid, async (success) => {
+                await updatePipelineTransaction(response, true, success ? pipelineStatus.completed : pipelineStatus.failed, '')
+            })
 
             res.status(200).json({guid: response})
         })

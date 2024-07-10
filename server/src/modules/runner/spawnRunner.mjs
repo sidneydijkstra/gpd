@@ -1,6 +1,6 @@
 import { spawn } from 'child_process';
 
-export function spawnRunner(transactionGuid, repoGuid, pipelineGuid){
+export function spawnRunner(transactionGuid, repoGuid, pipelineGuid, onCompleted=null){
     console.log(`Running pipeline: `, transactionGuid)
 
     var command = `node ./src/modules/runner/soloJobRunner.mjs ${transactionGuid} ${repoGuid} "${pipelineGuid}"`
@@ -16,7 +16,10 @@ export function spawnRunner(transactionGuid, repoGuid, pipelineGuid){
         console.error(`[spawnRunner] stderr: ${data}`);
     });
 
-    child.on('close', (code) => {
+    child.on('close', async (code) => {
         console.log(`[spawnRunner] Process exited with code ${code}`);
+        if(onCompleted){
+            await onCompleted(code == 0)
+        }
     }); 
 }

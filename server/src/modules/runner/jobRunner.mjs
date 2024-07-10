@@ -1,5 +1,5 @@
 import { getRepositoryByGuid } from '../database/repositories.mjs';
-import { getPipelineByGuid, getPipelineTransactionByGuid, addPipelineTask, updatePipelineTask, updatePipelineTransaction } from '../database/pipelines.mjs';
+import { getPipelineByGuid, getPipelineTransactionByGuid, addPipelineTask, updatePipelineTask } from '../database/pipelines.mjs';
 import useMqttClient from '../mqtt/mqttClient.mjs';
 import pipelineStatus from '../../enums/pipelineStatus.mjs';
 import pipelineTaskStatus from '../../enums/pipelineTaskStatus.mjs';
@@ -46,7 +46,6 @@ export async function runConfig(repoGuid, pipelineGuid, transactionGuid){
             // Parse the config file
             var parsedConfig = parseConfigString(jobConfig)
         } catch (error) {
-            await updatePipelineTransaction(transactionGuid, true, pipelineStatus.failed, 'N')
             reject('Error parsing config')
             return
         }
@@ -109,9 +108,6 @@ export async function runConfig(repoGuid, pipelineGuid, transactionGuid){
         if (!config.DEBUG_MODE) removeWorkerFolder(repo.guid)
 
         mqttClient.publish(`pipe/${pipeline.guid}/trans/${transactionGuid}`, pipelineStatus.completed)
-        
-        // Complete the transaction
-        await updatePipelineTransaction(transactionGuid, true, pipelineStatus.completed, 'Y')
 
         // Resolve the promise
         resolve()
