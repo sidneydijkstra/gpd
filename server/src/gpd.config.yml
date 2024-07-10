@@ -10,3 +10,34 @@ jobs:
       - name: 'useCmd'
         title: 'Run tree'
         command: 'tree'
+
+jobs:
+  - name: 'CI for sidneydijkstra/Vueam'
+    tasks:
+      - name: 'useCmd'
+        title: 'Run npm version check'
+        command: 'npm --version'
+      - name: 'useCmd'
+        title: 'Install and Build'
+        directory: '/project/'
+        command:
+             - 'npm install'
+             - 'npm run build:lib'
+      - name: 'useCmd'
+        title: 'Test'
+        directory: '/project/'
+        command:
+             - 'npm run coverage'
+             
+      - name: 'useArtifact'
+        title: 'Upload coverage'
+        directory: '/project/coverage'
+      - name: 'useArtifact'
+        title: 'Upload build'
+        directory: '/project/dist'
+        targetDirectory: './library'
+        copyContent: true
+      - name: 'useArtifact'
+        title: 'Upload test'
+        file: '/project/coverage/index.html'
+        targetName: 'myfile.html'

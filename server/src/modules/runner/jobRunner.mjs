@@ -34,7 +34,7 @@ export async function runConfig(repoGuid, pipelineGuid, transactionGuid){
         }
 
         // Prepare worker folder, creates project, storage and artifacts folders
-        var folderPath = prepareWorkerFolder(`${repo.username}-${repo.repository}`, `${Math.random()*1}`)
+        var folderPath = prepareWorkerFolder(`${repo.username}-${repo.repository}`, transactionGuid)
         // Create file logger
         var logger = new FileLogger(`${folderPath}/log.txt`)
         // Log the start of the job
@@ -71,7 +71,7 @@ export async function runConfig(repoGuid, pipelineGuid, transactionGuid){
                 mqttClient.publish(`pipe/${pipeline.guid}/trans/${transactionGuid}/task/${guid}`, pipelineTaskStatus.running)
                 
                 // Delay for debugging
-                await new Promise(r => setTimeout(r, 2000));
+                await new Promise(r => setTimeout(r, 1000));
                 // Create task logger
                 var taskLogger = new FileLogger(`${folderPath}/log.txt`)
                 // Start to record the logger
@@ -81,7 +81,7 @@ export async function runConfig(repoGuid, pipelineGuid, transactionGuid){
                 var taskResult = false
                 if(storedJobs.hasOwnProperty(task.name)){
                     try {
-                        taskResult = await storedJobs[task.name](task, taskLogger)
+                        taskResult = await storedJobs[task.name](task, folderPath, taskLogger)
                     } catch (error) {
                         logger.log(`Error running job ${task.name}: ${error}`)
                     }

@@ -1,12 +1,21 @@
 import { spawnSync, spawn } from 'child_process';
 
-export async function useCmd(config, logger){
+export async function useCmd(config, folderPath, logger){
     logger.log(`Running job useCmd with config: `, config)
 
     var result = await Promise.resolve(new Promise((resolve, reject) => {
+        var directory = config.hasOwnProperty('directory') ? config.directory : ''
         var command = config.command
+        
+        if (directory != '') {
+            directory = '/' + directory.replace(/^\.\//, '').replace(/^\//, '')
+        }
 
-        const child = spawn(command, [], { shell: true });
+        if (Array.isArray(command)) {
+            command = command.join(' && ')
+        }
+
+        const child = spawn(command, [], { shell: true, cwd: `${folderPath}${directory}` });
 
         child.stdout.on('data', (data) => {
             logger.log(data.toString());

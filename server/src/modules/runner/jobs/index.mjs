@@ -1,5 +1,7 @@
 import { useCmd } from "./useCmd.mjs";
+import { useArtifact } from "./useArtifact.mjs";
 
 export const jobs = {
-    "useCmd": useCmd
+    "useCmd": useCmd,
+    "useArtifact": useArtifact
 }
