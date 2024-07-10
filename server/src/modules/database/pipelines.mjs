@@ -37,11 +37,7 @@ export function getPipelineByGuid(guid){
 
             resolve(result)
           })
-          .catch(error => {
-            
-            console.log(error)
-            reject(error)
-          })
+          .catch(reject)
     })
 }
   
@@ -218,7 +214,6 @@ export function updatePipelineTask(guid, completed, status, content){
     return new Promise(async (resolve, reject) => {
         await getConnection()
           .then(async conn => {
-            console.log(guid)
             var result = await conn.all("update pipeline_tasks set completed = ?, status = ?, content = ?, lastUpdated = datetime('now') where guid = ?", [
                 completed, 
                 status,    

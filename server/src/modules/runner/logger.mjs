@@ -17,7 +17,7 @@ export class FileLogger {
       this.recording += message;
       fs.appendFileSync(this.filePath, `${timestamp}: ` + logMessages.join('') + '\n');
     } catch (error) {
-      console.log('Error writing to log file:', error);
+      console.log('[FileLogger] Error writing to log file:', error);
     }
   }
 

@@ -34,11 +34,7 @@ export function getRepositoryByGuid(guid){
             conn.close()
             resolve(result)
           })
-          .catch(error => {
-            
-            console.log(error)
-            reject(error)
-          })
+          .catch(reject)
     })
 }
   

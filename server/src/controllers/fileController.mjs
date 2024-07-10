@@ -12,7 +12,6 @@ router.get('/api/files/:guid/*', async (req, res) => {
     }
 
     var folders = req.params[0].replace(',', '/')
-    console.log('file route: ', req.params[0])
     var result = getAllFiles(`${repo.username}-${repo.repository}`, folders)
     res.status(200).json(result);
 })

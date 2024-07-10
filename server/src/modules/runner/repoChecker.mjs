@@ -1,7 +1,7 @@
 import { getRepositories } from '../database/repositories.mjs'
 import { pullRepository } from '../fileClient.mjs'
 
-const CHECKER_INTERVAL = 100000
+import config from '../../server.config.mjs'
 
 function sleep(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
@@ -15,22 +15,22 @@ export async function checkRepositories(){
                     await pullRepository(`${repo.username}-${repo.repository}`)
                         .then(async response => {
                             if(response){
-                                console.log(`Repository ${repo.username}-${repo.repository} has been updated. Running pipelines!`)
+                                console.log(`[checkRepository] Repository ${repo.username}-${repo.repository} has been updated. Running pipelines!`)
                                 // TODO: Execute CI/CD pipeline
                             }else{
-                                console.log(`Repository ${repo.username}-${repo.repository} has not been updated.`)
+                                console.log(`[checkRepository] Repository ${repo.username}-${repo.repository} has not been updated.`)
                             }
                         })
                         .catch(error => {
-                            console.error(`Error pulling repository ${repo.username}-${repo.repository}: ${error}`)
+                            console.error(`[checkRepository] Error pulling repository ${repo.username}-${repo.repository}: ${error}`)
                         })
                 });
 
             })
             .catch(error => {
-                console.error(`Error getting repositories: ${error}`)
+                console.error(`[checkRepository] Error getting repositories: ${error}`)
             })
 
-        await sleep(CHECKER_INTERVAL)
+        await sleep(config.repositoryCheckInterval)
     }
 }

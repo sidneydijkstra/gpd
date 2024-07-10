@@ -8,7 +8,7 @@ import { parseConfigString } from './configParser.mjs';
 import { jobs as storedJobs } from './jobs/index.mjs';
 import { FileLogger } from './logger.mjs';
 
-const DEBUG_MODE = true
+import config from '../../server.config.mjs'
 
 export async function runConfig(repoGuid, pipelineGuid, transactionGuid){
     return new Promise(async (resolve, reject) => {
@@ -45,9 +45,9 @@ export async function runConfig(repoGuid, pipelineGuid, transactionGuid){
         mqttClient.publish(`pipe/${pipeline.guid}/trans/${transactionGuid}`, pipelineStatus.running)
 
         // Escape the config file
-        var config = pipeline.content.replace(/\\n/g, '\n').replace(/\\"/g, '\"').slice(1,-1)
+        var jobConfig = pipeline.content.replace(/\\n/g, '\n').replace(/\\"/g, '\"').slice(1,-1)
         // Parse the config file
-        var parsedConfig = parseConfigString(config)
+        var parsedConfig = parseConfigString(jobConfig)
         
         logger.log(`Config parsed`)
         
@@ -100,7 +100,7 @@ export async function runConfig(repoGuid, pipelineGuid, transactionGuid){
             }
         }
 
-        if (!DEBUG_MODE) removeWorkerFolder(repo.guid)
+        if (!config.DEBUG_MODE) removeWorkerFolder(repo.guid)
 
         mqttClient.publish(`pipe/${pipeline.guid}/trans/${transactionGuid}`, pipelineStatus.completed)
         

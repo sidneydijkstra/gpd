@@ -9,14 +9,14 @@ export function spawnRunner(transactionGuid, repoGuid, pipelineGuid){
     const child = spawn(command, [], { shell: true, cwd: process.cwd()})
 
     child.stdout.on('data', (data) => {
-        console.log(`child stdout: ${data}`);
+        console.log(`[spawnRunner] stdout: ${data}`);
     });
     
     child.stderr.on('data', (data) => {
-        console.error(`child stderr: ${data}`);
+        console.error(`[spawnRunner] stderr: ${data}`);
     });
 
     child.on('close', (code) => {
-        console.log(`child process exited with code ${code}`);
+        console.log(`[spawnRunner] Process exited with code ${code}`);
     }); 
 }

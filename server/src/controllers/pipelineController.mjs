@@ -80,7 +80,6 @@ router.get('/api/from/:repoGuid/pipeline', async (req, res) => {
 })
 
 router.post('/api/from/:repoGuid/pipeline', async (req, res) => {
-    console.log(req.body)
     if(req.body.name == null || req.body.content == null){
         res.status(400).json({message: 'Missing required fields'})
         return

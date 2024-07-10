@@ -1,15 +1,13 @@
 import fs from 'fs';
+import config from '../server.config.mjs';
 import { createFolder, copyFolderContent, isFolderGitRepository, removeFolder } from '../helpers/gitHelper.mjs';
 import git from '@npmcli/git';
 
-const defaultRepoFolderPath = './.rebpg';
-const defaultWorkerFolderPath = './.wogpd';
-
 export async function cloneRepository(url, branch, folderName) {
-    createFolder(defaultRepoFolderPath)
+    createFolder(config.defaultRepoFolderPath)
 
     console.log(url, folderName)
-    var folderPath = `${defaultRepoFolderPath}/${folderName}`
+    var folderPath = `${config.defaultRepoFolderPath}/${folderName}`
     if(isFolderGitRepository(folderPath)) {
         console.log("Folder already is a git repository")
     } else {
@@ -19,7 +17,7 @@ export async function cloneRepository(url, branch, folderName) {
 
 export async function pullRepository(folderName) {
     var isSuccessful = false
-    var folderPath = `${defaultRepoFolderPath}/${folderName}`
+    var folderPath = `${config.defaultRepoFolderPath}/${folderName}`
     console.log(folderPath)
     if(isFolderGitRepository(folderPath)) {
         await git.spawn(['pull'], {cwd: folderPath})
@@ -37,14 +35,14 @@ export async function pullRepository(folderName) {
 }
 
 export async function removeRepositoryFolder(folderName) {
-    var folderPath = `${defaultRepoFolderPath}/${folderName}`
+    var folderPath = `${config.defaultRepoFolderPath}/${folderName}`
     if(isFolderGitRepository(folderPath)) {
         fs.rmdirSync(folderPath, {recursive: true})
     }
 }
 
 export function getAllFiles(folderName, path = '') {
-    var folderPath = `${defaultRepoFolderPath}/${folderName}`
+    var folderPath = `${config.defaultRepoFolderPath}/${folderName}`
     if(fs.existsSync(folderPath)){
         var fullPath = `${folderPath}/${path}`
         var isDirectory = fs.lstatSync(fullPath).isDirectory()
@@ -74,7 +72,7 @@ export function getAllFiles(folderName, path = '') {
 }
 
 export function getFileContent(folderName, fileName) {
-    var folderPath = `${defaultRepoFolderPath}/${folderName}`
+    var folderPath = `${config.defaultRepoFolderPath}/${folderName}`
     if(isFolderGitRepository(folderPath)) {
         var content = fs.readFileSync(`${folderPath}/${fileName}`, 'utf8')
         return content
@@ -84,21 +82,21 @@ export function getFileContent(folderName, fileName) {
 }
 
 export function prepareWorkerFolder(projectName, uniqueId='') {
-    createFolder(defaultWorkerFolderPath)
+    createFolder(config.defaultWorkerFolderPath)
 
-    var folderPath = `${defaultWorkerFolderPath}/${projectName}-${uniqueId}`
+    var folderPath = `${config.defaultWorkerFolderPath}/${projectName}-${uniqueId}`
     createFolder(folderPath)
     createFolder(`${folderPath}/project`)
     createFolder(`${folderPath}/storage`)
     createFolder(`${folderPath}/artifacts`)
 
-    var projectPath = `${defaultRepoFolderPath}/${projectName}`
+    var projectPath = `${config.defaultRepoFolderPath}/${projectName}`
     copyFolderContent(projectPath, `${folderPath}/project`)
 
     return folderPath
 }
 
 export function removeWorkerFolder(projectName) {
-    var folderPath = `${defaultWorkerFolderPath}/${projectName}`
+    var folderPath = `${config.defaultWorkerFolderPath}/${projectName}`
     removeFolder(folderPath)
 }

@@ -1,19 +1,18 @@
 import aedes from 'aedes'
 import { createServer } from 'aedes-server-factory'
 
-const DEBUG_MODE = true
+import config from "../../server.config.mjs"
 
-const port = 8888
 const mqttServer = aedes()
 const server = createServer(mqttServer, { ws: true})
 
 export default function initializeMqtt(){
     console.log('MQTT server initialized');
-    server.listen(port, function () {
-        console.log('[MQTT] Server started and listening on port ', port)
+    server.listen(config.mqttServerPort, function () {
+        console.log('[MQTT] Server started and listening on port ', config.mqttServerPort)
     })
 
-    if(!DEBUG_MODE)
+    if(!config.DEBUG_MODE)
         return
     
     server.on('error', function (err) {

@@ -1,11 +1,12 @@
 import mqtt from "mqtt"
 
+import config from "../../server.config.mjs"
 
 export default function useMqttClient(){
-    const mqttClient = mqtt.connect("ws://192.168.1.2:8888")
+    const mqttClient = mqtt.connect(config.mqttServerUrl)
 
     mqttClient.on('connect', function () {
-        console.log('Connected to MQTT server');
+        console.log('[MQTT-Client] Connected to MQTT server');
     })
 
     return mqttClient

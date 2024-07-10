@@ -18,7 +18,6 @@ var cashedRepositories = [];
 
 router.get('/api/repository', async (req, res) => {
     var result = Object.values(cashedRepositories);
-    console.log(result)
     res.status(200).json(result);
 })
 
@@ -53,7 +52,6 @@ router.get('/api/repository/:user/:repository', async (req, res) => {
             // Return the created repository
             await getRepositoryByGuid(guid)
                 .then(response => {
-                    console.log(response)
                     // Cache the repository
                     cashedRepositories[cacheKey] = response
                     // Return the repository
