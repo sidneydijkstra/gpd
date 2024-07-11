@@ -4,6 +4,7 @@ export class FileLogger {
   constructor(filePath) {
     this.filePath = filePath;
     this.recording = '';
+    this.callback = () => {};
   }
 
   log(...messages) {
@@ -15,10 +16,19 @@ export class FileLogger {
     try {
       var message = `${timestamp}: ` + logMessages.join('') + '\n'
       this.recording += message;
+      this.callback(message);
       fs.appendFileSync(this.filePath, `${timestamp}: ` + logMessages.join('') + '\n');
     } catch (error) {
       console.log('[FileLogger] Error writing to log file:', error);
     }
+  }
+
+  onLog(callback) {
+    this.callback = callback;
+  }
+  
+  offLog() {
+    this.callback = () => {};
   }
 
   record(){

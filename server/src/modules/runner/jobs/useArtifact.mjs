@@ -37,6 +37,7 @@ export async function useArtifact(config, folderPath, logger){
         }
     }
 
+    logger.log(`Artifact created`)
 
     return true
 }
