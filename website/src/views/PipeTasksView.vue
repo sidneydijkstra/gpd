@@ -1,9 +1,9 @@
 <script setup>
-import DynamicTable from '@/components/Utilities/DynamicTable.vue'
 import { onBeforeMount, ref} from 'vue';
 import { useRoute, useRouter } from 'vue-router'
 import { getRepositoryByGuid, getPipelineByGuid, getPipelineTasks } from '@/modules/serverApi.js'
 import pipelineTaskStatus from '@/enums/pipelineTaskStatus.js'
+import onMqttCallback from '@/composables/onMqttCallback';
 
 const route = useRoute()
 const router = useRouter()
@@ -45,9 +45,28 @@ async function reload(){
 
     await getPipelineTasks(route.params.pipeGuid, route.params.transGuid)
         .then(response => {
+            if(response.length <= 0)
+                return
+            
+            // Set tasks and select the first one
             tasks.value = response
-            if(response.length > 0){
-                selectedTask.value = response[0]
+            selectedTask.value = response[0]
+            // Loop all tasks and listen for updates if there still running
+            for(let i = 0; i < response.length; i++){
+                // Skip completed and failed tasks
+                if(response[i].status == pipelineTaskStatus.completed || response[i].status == pipelineTaskStatus.failed)
+                    continue
+
+                onMqttCallback(`pipe/${route.params.pipeGuid}/trans/${route.params.transGuid}/task/${response[i].guid}`, (task, cancelEvent) => {
+                    // Replace received transaction with the one in the list
+                    const index = tasks.value.findIndex(x => x.guid === task.guid)
+                    if (index == -1) return
+                    tasks.value.splice(index, 1, task)
+                    // If the transaction is completed or failed, remove the listener
+                    if (task.status == pipelineTaskStatus.completed || task.status == pipelineTaskStatus.failed) {
+                        cancelEvent()
+                    }
+                }, true)
             }
         })
         .catch(error => {

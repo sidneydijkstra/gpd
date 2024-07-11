@@ -12,3 +12,7 @@ export default {
         })
     }
 };
+
+export function useMqttClient() {
+    return mqttClient
+}

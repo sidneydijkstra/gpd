@@ -45,7 +45,7 @@ function navigateTo(routeName) {
             <span class="text-primary font-bold">{{ item.label }}</span>
         </template>
         <template #item="{ item, props }">
-            <a class="flex items-center" v-bind="props.action" v-click="item.command">
+            <a class="flex items-center" v-bind="props.action" v-on:click="item.command">
                 <span :class="item.icon" />
                 <span>{{ item.label }}</span>
                 <Badge v-if="item.badge" class="ml-auto" :value="item.badge" />

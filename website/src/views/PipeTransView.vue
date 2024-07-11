@@ -4,6 +4,7 @@ import { useRoute, useRouter } from 'vue-router'
 import { useConfirm } from "primevue/useconfirm";
 import { getRepositoryByGuid, getPipelineByGuid, getPipelineTransactions, runPipeline, deletePipeline } from '@/modules/serverApi.js'
 import pipelineStatus from '@/enums/pipelineStatus.js'
+import onMqttCallback from '@/composables/onMqttCallback.js';
 
 const route = useRoute()
 const router = useRouter()
@@ -45,7 +46,17 @@ function openDeletePopup(event) {
 async function onClickRun(){
     await runPipeline(route.params.pipeGuid)
         .then(response => {
-            console.log(response)
+            onMqttCallback(`pipe/${route.params.pipeGuid}/trans/${response.guid}`, (transaction, cancelEvent) => {
+                // Replace received transaction with the one in the list
+                const index = transactions.value.findIndex(x => x.guid === transaction.guid)
+                if (index == -1) return
+                transactions.value.splice(index, 1, transaction)
+
+                // If the transaction is completed or failed, remove the listener
+                if (transaction.status == pipelineStatus.completed || transaction.status == pipelineStatus.failed) {
+                    cancelEvent()
+                }
+            }, true)
         })
         .catch(error => {
             console.log(error)
@@ -100,7 +111,30 @@ async function reload(){
 
     await getPipelineTransactions(route.params.pipeGuid)
         .then(response => {
+            if(response.length <= 0)
+                return
+            
             transactions.value = response.reverse()
+
+            // Loop all transactions and listen for updates if there still running
+            for(let i = 0; i < response.length; i++){
+                // Skip completed and failed transactions
+                if(response[i].status == pipelineStatus.completed || response[i].status == pipelineStatus.failed)
+                    continue
+
+                onMqttCallback(`pipe/${route.params.pipeGuid}/trans/${response[i].guid}`, (transaction, cancelEvent) => {
+                    // Replace received transaction with the one in the list
+                    const index = transactions.value.findIndex(x => x.guid === transaction.guid)
+                    if (index == -1) return
+                    transactions.value.splice(index, 1, transaction)
+
+                    // If the transaction is completed or failed, remove the listener
+                    if (transaction.status == pipelineStatus.completed || transaction.status == pipelineStatus.failed) {
+                        cancelEvent()
+                    }
+                }, true)
+            }
+
         })
         .catch(error => {
             console.log(error)
