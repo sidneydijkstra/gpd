@@ -1,5 +1,5 @@
 import { getRepositoryByGuid } from '../database/repositories.mjs';
-import { getPipelineByGuid, getPipelineTransactionByGuid, addPipelineTask, updatePipelineTask } from '../database/pipelines.mjs';
+import { getPipelineByGuid, getPipelineTransactionByGuid, addPipelineTask, updatePipelineTask, getPipelineTaskByGuid } from '../database/pipelines.mjs';
 import useMqttClient from '../mqtt/mqttClient.mjs';
 import pipelineStatus from '../../enums/pipelineStatus.mjs';
 import pipelineTaskStatus from '../../enums/pipelineTaskStatus.mjs';
@@ -64,14 +64,14 @@ export async function runConfig(repoGuid, pipelineGuid, transactionGuid){
                 seq++
             }
         }
-
         logger.log(`Tasks created`)
         
-        // Create mqqt client and publish the start of the pipeline
+        // Create mqqt client
         const mqttClient = useMqttClient()
-        mqttClient.publish(`pipe/${pipeline.guid}/trans/${transactionGuid}`, pipelineStatus.running)
-        
         logger.log(`Connected with server`)
+        
+        // Publish the transaction
+        mqttClient.publish(`pipe/${pipeline.guid}/trans/${transactionGuid}`, JSON.stringify(transaction))
         
         // Get all jobs
         var jobs = parsedConfig.jobs;
@@ -83,12 +83,20 @@ export async function runConfig(repoGuid, pipelineGuid, transactionGuid){
 
             // Run each task
             for(var task of tasks){
-                logger.log(`Running task ${task.name}`)
+                // Get the task guid
+                var taskGuid = taskTransactionGuids[0]
+                // Remove the task from the array
+                taskTransactionGuids.shift()
+
+                logger.log(`Running task ${task.name} - ${taskGuid}`)
                 
                 // Update the task in the database
-                await updatePipelineTask(taskTransactionGuids[0], true, pipelineTaskStatus.running, '')
+                await updatePipelineTask(taskGuid, true, pipelineTaskStatus.running, '')
+
+                // Get pipeline task
+                var taskTransaction = await getPipelineTaskByGuid(taskGuid)
                 // Publish the task status
-                mqttClient.publish(`pipe/${pipeline.guid}/trans/${transactionGuid}/task/${guid}`, pipelineTaskStatus.running)
+                mqttClient.publish(`pipe/${pipeline.guid}/trans/${transactionGuid}/task/${taskGuid}`, JSON.stringify(taskTransaction))
                 
                 // Delay for debugging
                 await new Promise(r => setTimeout(r, 1000));
@@ -111,17 +119,24 @@ export async function runConfig(repoGuid, pipelineGuid, transactionGuid){
                 
                 var taskStatus = taskResult ? pipelineTaskStatus.completed : pipelineTaskStatus.failed
                 // Update the task in the database
-                await updatePipelineTask(taskTransactionGuids[0], true, taskStatus, taskLogger.recordResult())
-                // Remove the task from the array
-                taskTransactionGuids.shift()
-                // Publish the task status
-                mqttClient.publish(`pipe/${pipeline.guid}/trans/${transactionGuid}/task/${guid}`, taskStatus)
+                await updatePipelineTask(taskGuid, true, taskStatus, taskLogger.recordResult())
+
+                // Get pipeline task
+                taskTransaction = await getPipelineTaskByGuid(taskGuid)
+                // Publish the task
+                mqttClient.publish(`pipe/${pipeline.guid}/trans/${transactionGuid}/task/${taskGuid}`, JSON.stringify(taskTransaction))
+                logger.log(`Task ${task.name} - ${taskGuid} completed`)
             }
         }
+        
+        // Update the transaction status
+        transaction.status = pipelineStatus.completed
+        // Publish the transaction
+        mqttClient.publish(`pipe/${pipeline.guid}/trans/${transactionGuid}`, JSON.stringify(transaction))
 
         if (!config.DEBUG_MODE) removeWorkerFolder(repo.guid)
-
-        mqttClient.publish(`pipe/${pipeline.guid}/trans/${transactionGuid}`, pipelineStatus.completed)
+            
+        await new Promise(r => setTimeout(r, 1000));
 
         // Resolve the promise
         resolve()
