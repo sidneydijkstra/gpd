@@ -107,7 +107,10 @@ export async function runConfig(repoGuid, pipelineGuid, transactionGuid){
                 // Log task output
                 taskLogger.onLog((message) => {
                     // Publish the task log
-                    mqttClient.publish(`pipe/${pipeline.guid}/trans/${transactionGuid}/task/${taskGuid}/output`, message)
+                    mqttClient.publish(`pipe/${pipeline.guid}/trans/${transactionGuid}/task/${taskGuid}/output`, JSON.stringify({
+                        status: pipelineTaskStatus.running,
+                        output: message
+                    }))
                 })
 
                 // Run the job
@@ -125,6 +128,11 @@ export async function runConfig(repoGuid, pipelineGuid, transactionGuid){
                 var taskStatus = taskResult ? pipelineTaskStatus.completed : pipelineTaskStatus.failed
                 // Update the task in the database
                 await updatePipelineTask(taskGuid, true, taskStatus, taskLogger.recordResult())
+                // Publish the task log completion
+                mqttClient.publish(`pipe/${pipeline.guid}/trans/${transactionGuid}/task/${taskGuid}/output`, JSON.stringify({
+                    status: taskStatus,
+                    output: ''
+                }))
                 // Stop event on logger
                 taskLogger.offLog()
 
@@ -138,6 +146,7 @@ export async function runConfig(repoGuid, pipelineGuid, transactionGuid){
         
         // Update the transaction status
         transaction.status = pipelineStatus.completed
+        
         // Publish the transaction
         mqttClient.publish(`pipe/${pipeline.guid}/trans/${transactionGuid}`, JSON.stringify(transaction))
 

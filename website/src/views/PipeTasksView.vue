@@ -19,8 +19,39 @@ function onNavigateBack(){
 }
 
 async function onClickTask(task){
-    console.log(task)
     selectedTask.value = task
+}
+
+function listenToTask(taskGuid){
+    onMqttCallback(`pipe/${route.params.pipeGuid}/trans/${route.params.transGuid}/task/${taskGuid}`, (task, cancelEvent) => {
+        // Replace received transaction with the one in the list
+        const index = tasks.value.findIndex(x => x.guid === task.guid)
+        if (index == -1) return
+        tasks.value.splice(index, 1, task)
+        // If the transaction is completed or failed, remove the listener
+        if (task.status == pipelineTaskStatus.completed || task.status == pipelineTaskStatus.failed) {
+            // If the selected task is the one that is completed, set the next task as selected
+            var nextIndex = index + 1
+            if(selectedTask.value.guid == task.guid && nextIndex < tasks.value.length){
+                selectedTask.value = tasks.value[nextIndex]
+                // Listen to the next task output
+                listenToTaskOutput(selectedTask.value.guid)
+            }
+
+            cancelEvent()
+        }
+    }, true)
+}
+
+function listenToTaskOutput(taskGuid){
+    onMqttCallback(`pipe/${route.params.pipeGuid}/trans/${route.params.transGuid}/task/${taskGuid}/output`, (stream, cancelEvent) => {
+        // Append output to selected task content or cancel event if task is not running anymore
+        if (stream.status == pipelineTaskStatus.running) {
+            selectedTask.value.content += stream.output
+        }else{
+            cancelEvent()
+        }
+    }, true)
 }
 
 async function reload(){
@@ -48,25 +79,22 @@ async function reload(){
             if(response.length <= 0)
                 return
             
-            // Set tasks and select the first one
+            // Set tasks
             tasks.value = response
-            selectedTask.value = response[0]
+            // Set selected task to running task or first task
+            selectedTask.value = response.find(x => x.status == pipelineTaskStatus.running) || response[0]
+
+            if(selectedTask.value.status == pipelineTaskStatus.running){
+                listenToTaskOutput(selectedTask.value.guid)
+            }
+
             // Loop all tasks and listen for updates if there still running
             for(let i = 0; i < response.length; i++){
                 // Skip completed and failed tasks
                 if(response[i].status == pipelineTaskStatus.completed || response[i].status == pipelineTaskStatus.failed)
                     continue
 
-                onMqttCallback(`pipe/${route.params.pipeGuid}/trans/${route.params.transGuid}/task/${response[i].guid}`, (task, cancelEvent) => {
-                    // Replace received transaction with the one in the list
-                    const index = tasks.value.findIndex(x => x.guid === task.guid)
-                    if (index == -1) return
-                    tasks.value.splice(index, 1, task)
-                    // If the transaction is completed or failed, remove the listener
-                    if (task.status == pipelineTaskStatus.completed || task.status == pipelineTaskStatus.failed) {
-                        cancelEvent()
-                    }
-                }, true)
+                listenToTask(response[i].guid)
             }
         })
         .catch(error => {
