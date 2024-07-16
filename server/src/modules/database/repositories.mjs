@@ -38,15 +38,16 @@ export function getRepositoryByGuid(guid){
     })
 }
   
-export function addRepository(username, repository, content){
+export function addRepository(source, username, repository, content){
     return new Promise(async (resolve, reject) => {
         await getConnection()
           .then(async conn => {
             var guid = v4() // generate guid
             var parsedContent = JSON.stringify(content)
   
-            var result = await conn.all(`insert into repos values (null, ?, ?, ?, ?, datetime('now'))`, [
+            var result = await conn.all(`insert into repos values (null, ?, ?, ?, ?, ?, datetime('now'))`, [
               guid,
+              source,
               username,
               repository,
               parsedContent

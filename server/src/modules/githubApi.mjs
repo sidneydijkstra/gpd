@@ -1,15 +1,10 @@
+import config from "../server.config.mjs";
 import { useGenerateApi } from "./useGenerateApi.mjs";
 
 const githubToken = process.env.GITHUB_API_KEY;
-const githubClient = useGenerateApi("https://api.github.com", {
-    headers: {
-        "User-Agent": "xyz",
-        Authorization: `bearer ${token}`,
-    },
-});
 
 export async function getRateLimit(){
-    const client = useGenerateApi("https://api.github.com", {
+    const client = useGenerateApi(config.githubApiUrl, {
         headers: {
             "User-Agent": "xyz",
             Authorization: `bearer ${githubToken}`,
@@ -20,7 +15,7 @@ export async function getRateLimit(){
 }
 
 export async function getGithubRepository(username, repo) {
-    const client = useGenerateApi("https://api.github.com", {
+    const client = useGenerateApi(config.githubApiUrl, {
         headers: {
             "User-Agent": "xyz",
             Authorization: `bearer ${githubToken}`,

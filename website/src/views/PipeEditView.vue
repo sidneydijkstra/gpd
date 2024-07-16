@@ -99,7 +99,7 @@ onBeforeMount(async () => {
 <template>
   <div v-if="!isLoading">
     <Card>
-      <template #title><Button icon="pi pi-arrow-left" size="small" severity="secondary" v-on:click="onNavigateBack" text /> {{ repo.content.full_name }}</template>
+      <template #title><Button icon="pi pi-arrow-left" size="small" severity="secondary" v-on:click="onNavigateBack" text /> {{ repo.username }}/{{ repo.repository }}</template>
       <template #content>
           <InputGroup>
               <InputText placeholder="Pipeline Name" v-model="pipeline.name" />

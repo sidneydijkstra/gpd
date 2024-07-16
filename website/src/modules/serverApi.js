@@ -10,8 +10,10 @@ export async function getStoredRepositories(){
     return apiClient.repository.get()
 }
 
-export async function getRepository(username, repository){
-    return apiClient.repository[`${username}`][`${repository}`].get()
+export async function getRepository(username, repository, source='github'){
+    return apiClient.repository[`${username}`][`${repository}`].get({
+        source: source
+    })
 }
 
 export async function getRepositoryByGuid(guid){

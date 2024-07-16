@@ -11,6 +11,7 @@ import { open } from 'sqlite'
         CREATE TABLE IF NOT EXISTS repos (
             id integer PRIMARY KEY AUTOINCREMENT,
             guid varchar(255),
+            source varchar(255),
             username varchar(255),
             repository varchar(255),
             content text,

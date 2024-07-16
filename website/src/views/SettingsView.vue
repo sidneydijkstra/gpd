@@ -55,7 +55,7 @@ onBeforeMount(async () => {
     <div class="col-6">
       <div class="d-flex align-items-center">
         <fa-icon icon="fa-solid fa-file" size="2x" />
-        <h2>&nbsp;{{ repo.content.full_name }}</h2>
+        <h2>&nbsp;{{ repo.username }}/{{ repo.repository }}</h2>
       </div>
       <hr>
       <button class="btn btn-dark m-1" v-on:click="onClickUpdate">Update</button>

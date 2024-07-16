@@ -22,8 +22,18 @@ export function generateAPI(baseUrl, defaults = {}) {
                         }
                     }
                     return fetch(url, payload)
-                        .then(response => response.text()) // Parse the response as text
+                        .then(async response => {
+                            // If the response is not OK, reject the promise with the status text
+                            if (!response.ok) {
+                                var error = await response.text()
+                                return Promise.reject(error)
+                            }
+                            
+                            // If the response is OK, parse it as text and return it
+                            return response.text()
+                        })
                         .then(text => {
+                            // Try to parse the response as JSON, if it fails, return the text
                             try {
                                 return JSON.parse(text)
                             } catch(err) {

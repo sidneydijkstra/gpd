@@ -11,17 +11,27 @@ const repoForm = reactive({
   repository: ''
 })
 
-function onAddRepository(){
-  console.log(repoForm)
+const source = ref('github')
+const sourceOptions = [
+  'github',
+  'gitlab'
+]
 
+function onAddRepository(){
   if(repoForm.username == null || repoForm.username == '' ||
     repoForm.repository == null || repoForm.repository == '')
     return
 
-  getRepository(repoForm.username, repoForm.repository)
+  if(repos.value.find(x => x.username == repoForm.username && x.repository == repoForm.repository))
+    return
+
+  getRepository(repoForm.username, repoForm.repository, source.value)
     .then(response => {
       response.content = JSON.parse(response.content)
       repos.value.push(response)
+    })
+    .catch(error => {
+      console.log(error)
     })
 }
 
@@ -46,16 +56,19 @@ onMounted(async () => {
     <div class="row justify-content-center">
         <div class="col-4">
         
-        <br>
-        <p>Enter a username and repository name to add the repository to your list.</p>
-        <div class="input-group mb-3">
-            <input v-model="repoForm.username" type="text" class="form-control" placeholder="Username" aria-label="Username">
-            <span class="input-group-text">/</span>
-            <input v-model="repoForm.repository" type="text" class="form-control" placeholder="Repository" aria-label="Repository">
-        </div>
-        <div class="d-grid gap-2 col-8 mx-auto">
-            <button type="button" class="btn btn-dark" v-on:click="onAddRepository">Add Repository</button>
-        </div>
+          <div class="d-flex justify-content-center">
+            <SelectButton v-model="source" :options="sourceOptions" aria-labelledby="basic" />
+          </div>
+          <br>
+          <p>Enter a username and repository name to add the repository to your list.</p>
+          <div class="input-group mb-3">
+              <input v-model="repoForm.username" type="text" class="form-control" placeholder="Username" aria-label="Username">
+              <span class="input-group-text">/</span>
+              <input v-model="repoForm.repository" type="text" class="form-control" placeholder="Repository" aria-label="Repository">
+          </div>
+          <div class="d-grid gap-2 col-8 mx-auto">
+              <button type="button" class="btn btn-dark" v-on:click="onAddRepository">Add Repository</button>
+          </div>
 
         </div>
     </div>
@@ -67,8 +80,8 @@ onMounted(async () => {
         <div class="list-group">
             <a v-for="repo in repos" href="#" class="list-group-item list-group-item-action" aria-current="true" v-on:click="onNavigateToRepo(repo.guid)">
                 <div class="d-flex w-100 justify-content-between">
-                    <h5 class="mb-1">{{ repo.content.full_name }}</h5>
-                    <small>{{ repo.content.language }}</small>
+                    <h5 class="mb-1">{{ repo.username }}/{{ repo.repository }}</h5>
+                    <small>{{ repo.source }}</small>
                 </div>
                 <p class="mb-1">{{ repo.content.description }}</p>
                 <small>Last update at {{ repo.lastUpdated }}</small>

@@ -113,7 +113,7 @@ onBeforeMount(async () => {
 <template>
   <div v-if="!isLoading">
     <Card>
-        <template #title><Button icon="pi pi-arrow-left"  size="small" severity="secondary" v-on:click="onNavigateBack" text /> {{ repo.content.full_name }}</template>
+        <template #title><Button icon="pi pi-arrow-left"  size="small" severity="secondary" v-on:click="onNavigateBack" text /> {{ repo.username }}/{{ repo.repository }}</template>
         <template #content>
             <div class="row p-0 m-0">
                 <div class="col-4">

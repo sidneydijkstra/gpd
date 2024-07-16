@@ -21,6 +21,7 @@ import Panel from 'primevue/panel';
 import Textarea from 'primevue/textarea';
 import InputGroup from 'primevue/inputgroup';
 import InputGroupAddon from 'primevue/inputgroupaddon';
+import SelectButton from 'primevue/selectbutton';
 
 export default {
     install: (app) => {
@@ -50,5 +51,6 @@ export default {
         app.component("Textarea", Textarea);
         app.component("InputGroup", InputGroup);
         app.component("InputGroupAddon", InputGroupAddon);
+        app.component("SelectButton", SelectButton);
     }
 }

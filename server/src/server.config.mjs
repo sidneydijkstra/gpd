@@ -1,4 +1,7 @@
 const config = {
+    githubApiUrl: 'https://api.github.com',
+    gitlabApiUrl: 'https://gitlab.com/api/v4',
+
     defaultRepoFolderPath: './.regpd',
     defaultWorkerFolderPath: './.wogpd',
     defaultStorageFolderPath: './.stgpd',

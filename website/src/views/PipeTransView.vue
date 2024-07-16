@@ -152,7 +152,7 @@ onBeforeMount(async () => {
 <template>
   <div v-if="!isLoading" class="row justify-content-center p-0 m-0">
     <Card>
-      <template #title><Button icon="pi pi-arrow-left"  size="small" severity="secondary" v-on:click="onNavigateBack" text /> {{ repo.content.full_name }}</template>
+      <template #title><Button icon="pi pi-arrow-left"  size="small" severity="secondary" v-on:click="onNavigateBack" text /> {{ repo.username }}/{{ repo.repository }}</template>
       <template #content>
             <div class="d-flex justify-content-between">
                 <div>

@@ -1,5 +1,6 @@
 import express from 'express'
 import { getGithubRepository } from "../modules/githubApi.mjs"
+import { getGitlabRepository } from "../modules/gitlabApi.mjs"
 import { getRepositories, getRepositoryByGuid, addRepository, updateRepository, removeRepositoryByGuid } from '../modules/database/repositories.mjs'
 import { cloneRepository, pullRepository, removeRepositoryFolder } from '../modules/fileClient.mjs'
 
@@ -30,19 +31,42 @@ router.get('/api/repository/:user/:repository', async (req, res) => {
         return
     }
     
-    var result;
-    // Get repository retails
-    await getGithubRepository(req.params.user, req.params.repository)
-        .then(response => {
-            result = response
-        })
-        .catch(_ => {
-            res.status(404).json({message: 'Repository not found'})
-            return
-        })
+    // Get repository based on source, if source is not provided, default to github
+    var result = null;
+    var source = req.query.source == null ? 'github' : req.query.source
+    if(source == 'github'){
+        await getGithubRepository(req.params.user, req.params.repository)
+            .then(response => {
+                result = response.status == 404 ? null : response
+            })
+            .catch(_ => {
+                result = null
+            })
+    }else if (source == 'gitlab'){
+        await getGitlabRepository(req.params.user, req.params.repository)
+            .then(response => {
+                result = response.status == 404 ? null : response
+
+                // TODO: Gitlab returns invalid response make this inline
+                if(result != null){
+                    result.clone_url = result.http_url_to_repo
+                }
+            })
+            .catch(_ => {
+                result = null
+            })
+    }else{
+        res.status(400).json({message: 'Invalid source'})
+        return
+    }
+
+    if(result == null){
+        res.status(404).json({message: 'Repository not found'})
+        return
+    }
 
     // Add repository to database
-    await addRepository(req.params.user, req.params.repository, result)
+    await addRepository(source, req.params.user, req.params.repository, result)
         .then(async guid => {
             // Clone repository
             await cloneRepository(result.clone_url, result.default_branch, `${req.params.user}-${req.params.repository}`)
