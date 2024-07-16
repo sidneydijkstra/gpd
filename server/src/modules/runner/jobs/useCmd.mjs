@@ -1,4 +1,4 @@
-import { spawnSync, spawn } from 'child_process';
+import { spawn } from 'child_process';
 
 export async function useCmd(config, folderPath, logger){
     logger.log(`Running job useCmd with config: `, config)

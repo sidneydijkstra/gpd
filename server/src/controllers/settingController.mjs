@@ -1,8 +1,19 @@
 import express from 'express'
 import { getRepositoryByGuid } from '../modules/database/repositories.mjs'
 import { getAllGlobalSettings, updateGlobalSetting, getAllRepositorySettings, updateRepositorySetting } from '../modules/database/settings.mjs'
+import { isDockerInstalled } from '../modules/dockerApi.mjs'
 
 const router = express.Router()
+
+router.get(`/api/setting/isDockerInstalled`, async (req, res) => {
+    isDockerInstalled()
+        .then(response => {
+            res.status(200).json({installed: true})
+        })
+        .catch(_ => {
+            res.status(200).json({installed: false})
+        })
+})
 
 router.get(`/api/setting/global`, async (req, res) => {
     getAllGlobalSettings()

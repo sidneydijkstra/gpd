@@ -36,8 +36,7 @@ jobs:
         title: 'Test'
         directory: '/project/'
         command:
-             - 'npm run coverage'
-             
+             - 'npm run coverage'  
       - name: 'useArtifact'
         title: 'Upload coverage'
         directory: '/project/coverage'
