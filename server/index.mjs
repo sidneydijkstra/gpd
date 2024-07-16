@@ -4,6 +4,7 @@ import cors from 'cors'
 import bodyParser from 'body-parser'
 
 import repositoryRouter from './src/controllers/repositoryController.mjs'
+import settingRouter from './src/controllers/settingController.mjs'
 import fileRouter from './src/controllers/fileController.mjs'
 import pipelineRouter from './src/controllers/pipelineController.mjs'
 
@@ -17,6 +18,7 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 
 app.use(repositoryRouter)
+app.use(settingRouter)
 app.use(fileRouter)
 app.use(pipelineRouter)
 

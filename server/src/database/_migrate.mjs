@@ -17,6 +17,15 @@ import { open } from 'sqlite'
             lastUpdated time
         );
 
+        CREATE TABLE IF NOT EXISTS settings (
+            id integer PRIMARY KEY AUTOINCREMENT NOT NULL,
+            repoId integer,
+            key varchar(255) NOT NULL,
+            value text NOT NULL,
+            lastUpdated time NOT NULL,
+            FOREIGN KEY (repoId) REFERENCES repos(id) ON DELETE CASCADE
+        );
+
         CREATE TABLE IF NOT EXISTS pipelines (
             id integer PRIMARY KEY AUTOINCREMENT NOT NULL,
             guid varchar(255) NOT NULL,

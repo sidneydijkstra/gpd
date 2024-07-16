@@ -7,7 +7,7 @@ import { open } from 'sqlite'
     driver: sqlite3.Database
   })
 
-  var res = await db.all(`select * from pipeline_tasks`)
+  var res = await db.all(`select * from settings`)
   console.log(res)
   // console.log(await db.get('delete from repos where 1 = 1'))
   // console.log(await db.get('select * from repos'))
