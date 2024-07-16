@@ -1,7 +1,7 @@
-import { generateAPI } from "./apiClient.mjs";
+import { useGenerateApi } from "./useGenerateApi.mjs";
 
-const token = process.env.GITHUB_API_KEY;
-const githubClient = generateAPI("https://api.github.com", {
+const githubToken = process.env.GITHUB_API_KEY;
+const githubClient = useGenerateApi("https://api.github.com", {
     headers: {
         "User-Agent": "xyz",
         Authorization: `bearer ${token}`,
@@ -9,19 +9,29 @@ const githubClient = generateAPI("https://api.github.com", {
 });
 
 export async function getRateLimit(){
-    return githubClient.rate_limit.get()
+    const client = useGenerateApi("https://api.github.com", {
+        headers: {
+            "User-Agent": "xyz",
+            Authorization: `bearer ${githubToken}`,
+        },
+    });
+
+    return client.rate_limit.get()
 }
 
-export async function getRepo(username, repo) {
-    /* GET /repos/{owner}/{repo} */
-    return githubClient.repos[`${username}`][`${repo}`].get();
+export async function getGithubRepository(username, repo) {
+    const client = useGenerateApi("https://api.github.com", {
+        headers: {
+            "User-Agent": "xyz",
+            Authorization: `bearer ${githubToken}`,
+        },
+    });
+
+    return client.repos[`${username}`][`${repo}`].get();
 }
 
-export function onError(error){
-    console.log(`An error occurred: ${error}`)
-}
-
-export async function rateLimit(){
+// Function to help with monitoring Github Api rate limit
+async function rateLimit(){
     var rateLimit;
 
     await getRateLimit()
@@ -34,7 +44,9 @@ export async function rateLimit(){
             }
             
         })
-        .catch(onError)
+        .catch(error => {
+            console.log(`[GithubApi] Error getting rate limit: ${error}`)
+        })
 
     return rateLimit;
 }

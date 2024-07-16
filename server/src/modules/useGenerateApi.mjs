@@ -4,7 +4,7 @@
 
 import fetch from "node-fetch";
 
-export function generateAPI(baseUrl, defaults = {}) {
+export function useGenerateApi(baseUrl, defaults = {}) {
     const callable = () => {};
     callable.url = baseUrl;
     return new Proxy(callable, {
@@ -28,7 +28,7 @@ export function generateAPI(baseUrl, defaults = {}) {
                 };
             }
 
-            return generateAPI(`${url}/${propKey}`, defaults);
+            return useGenerateApi(`${url}/${propKey}`, defaults);
         },
     });
 }

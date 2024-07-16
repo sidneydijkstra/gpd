@@ -1,5 +1,5 @@
 import express from 'express'
-import { getRepo, onError, rateLimit } from "../modules/githubApi.mjs"
+import { getGithubRepository } from "../modules/githubApi.mjs"
 import { getRepositories, getRepositoryByGuid, addRepository, updateRepository, removeRepositoryByGuid } from '../modules/database/repositories.mjs'
 import { cloneRepository, pullRepository, removeRepositoryFolder } from '../modules/fileClient.mjs'
 
@@ -32,8 +32,7 @@ router.get('/api/repository/:user/:repository', async (req, res) => {
     
     var result;
     // Get repository retails
-    console.log(await rateLimit())
-    await getRepo(req.params.user, req.params.repository)
+    await getGithubRepository(req.params.user, req.params.repository)
         .then(response => {
             result = response
         })
@@ -41,7 +40,6 @@ router.get('/api/repository/:user/:repository', async (req, res) => {
             res.status(404).json({message: 'Repository not found'})
             return
         })
-    console.log(await rateLimit())
 
     // Add repository to database
     await addRepository(req.params.user, req.params.repository, result)
@@ -87,8 +85,7 @@ router.post('/api/repository/:guid/update', async (req, res) => {
             console.log(`Pull request completed: ${pullRequest}`)
 
             // Get repository retails
-            console.log(await rateLimit())
-            await getRepo(response.username, response.repository)
+            await getGithubRepository(response.username, response.repository)
                 .then(async response => {
                     // Update repository
                     await updateRepository(req.params.guid, response)
@@ -107,8 +104,9 @@ router.post('/api/repository/:guid/update', async (req, res) => {
                             res.status(500).json({message: 'Error updating repository'})
                         })
                 })
-                .catch(onError)
-            console.log(await rateLimit())
+                .catch(_ => {
+                    res.status(404).json({message: 'Repository not found'})
+                })
         })
         .catch(_ => {
             res.status(404).json({message: 'Repository not found ' + _})
