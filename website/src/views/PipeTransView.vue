@@ -46,7 +46,7 @@ function openDeletePopup(event) {
 async function onClickRun(){
     await runPipeline(route.params.pipeGuid)
         .then(response => {
-            onMqttCallback(`pipe/${route.params.pipeGuid}/trans/${response.guid}`, (transaction, cancelEvent) => {
+            onMqttCallback(`trans/${response.guid}`, (transaction, cancelEvent) => {
                 // Replace received transaction with the one in the list
                 const index = transactions.value.findIndex(x => x.guid === transaction.guid)
                 if (index == -1) return
@@ -122,7 +122,7 @@ async function reload(){
                 if(response[i].status == pipelineStatus.completed || response[i].status == pipelineStatus.failed)
                     continue
 
-                onMqttCallback(`pipe/${route.params.pipeGuid}/trans/${response[i].guid}`, (transaction, cancelEvent) => {
+                onMqttCallback(`trans/${response[i].guid}`, (transaction, cancelEvent) => {
                     // Replace received transaction with the one in the list
                     const index = transactions.value.findIndex(x => x.guid === transaction.guid)
                     if (index == -1) return

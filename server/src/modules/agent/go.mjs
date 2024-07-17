@@ -53,7 +53,7 @@ async function executeAgent(agentGuid, workFolderPath, pipelineGuid, transaction
     transaction.status = pipelineStatus.running
     // Notify server that the transaction is running
     mqttClient.publish(`agent/${agentGuid}/trans-running`, JSON.stringify(transaction))
-    mqttClient.publish(`pipe/${pipelineGuid}/trans/${transactionGuid}`, JSON.stringify(transaction))
+    mqttClient.publish(`trans/${transactionGuid}`, JSON.stringify(transaction))
 
     logger.log(`Loading configuration`)
     // Get the config
@@ -76,7 +76,7 @@ async function executeAgent(agentGuid, workFolderPath, pipelineGuid, transaction
             task.status = pipelineTaskStatus.running
             // Notify server that the task is running
             mqttClient.publish(`agent/${agentGuid}/task-running`, JSON.stringify(task))
-            mqttClient.publish(`pipe/${pipelineGuid}/trans/${transactionGuid}/task/${task.guid}`, JSON.stringify(task))
+            mqttClient.publish(`task/${task.guid}`, JSON.stringify(task))
             
             logger.log(`Running task ${taskConfig.name} - ${task.guid}`)
             
@@ -89,7 +89,7 @@ async function executeAgent(agentGuid, workFolderPath, pipelineGuid, transaction
             // Log task output
             taskLogger.onLog((message) => {
                 // Publish the task log
-                mqttClient.publish(`pipe/${pipelineGuid}/trans/${transactionGuid}/task/${task.guid}/output`, JSON.stringify({
+                mqttClient.publish(`task/${task.guid}/stream`, JSON.stringify({
                     status: pipelineTaskStatus.running,
                     output: message
                 }))
@@ -111,7 +111,7 @@ async function executeAgent(agentGuid, workFolderPath, pipelineGuid, transaction
             var taskStatus = taskResult ? pipelineTaskStatus.completed : pipelineTaskStatus.failed
 
             // Publish the task log completion
-            mqttClient.publish(`pipe/${pipelineGuid}/trans/${transactionGuid}/task/${task.guid}/output`, JSON.stringify({
+            mqttClient.publish(`task/${task.guid}/stream`, JSON.stringify({
                 status: taskStatus,
                 output: ''
             }))
@@ -124,7 +124,7 @@ async function executeAgent(agentGuid, workFolderPath, pipelineGuid, transaction
             task.content = taskLogger.recordResult()
             // Notify server that the task is completed
             mqttClient.publish(`agent/${agentGuid}/task-completed`, JSON.stringify(task))
-            mqttClient.publish(`pipe/${pipelineGuid}/trans/${transactionGuid}/task/${task.guid}`, JSON.stringify(task))
+            mqttClient.publish(`task/${task.guid}`, JSON.stringify(task))
             
             logger.log(`Task ${taskConfig.name} - ${task.guid} completed`)
         }
@@ -139,7 +139,7 @@ async function executeAgent(agentGuid, workFolderPath, pipelineGuid, transaction
     transaction.status = pipelineStatus.completed
     // Notify server that the transaction is completed
     mqttClient.publish(`agent/${agentGuid}/trans-completed`, JSON.stringify(transaction))
-    mqttClient.publish(`pipe/${pipelineGuid}/trans/${transactionGuid}`, JSON.stringify(transaction))
+    mqttClient.publish(`trans/${transactionGuid}`, JSON.stringify(transaction))
     // TODO: solve issue where publish is not working when function returns to soon!
     await new Promise(r => setTimeout(r, 2000));
 

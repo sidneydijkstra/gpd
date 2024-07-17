@@ -23,7 +23,7 @@ async function onClickTask(task){
 }
 
 function listenToTask(taskGuid){
-    onMqttCallback(`pipe/${route.params.pipeGuid}/trans/${route.params.transGuid}/task/${taskGuid}`, (task, cancelEvent) => {
+    onMqttCallback(`task/${taskGuid}`, (task, cancelEvent) => {
         // Replace received transaction with the one in the list
         const index = tasks.value.findIndex(x => x.guid === task.guid)
         if (index == -1) return
@@ -44,7 +44,7 @@ function listenToTask(taskGuid){
 }
 
 function listenToTaskOutput(taskGuid){
-    onMqttCallback(`pipe/${route.params.pipeGuid}/trans/${route.params.transGuid}/task/${taskGuid}/output`, (stream, cancelEvent) => {
+    onMqttCallback(`task/${taskGuid}/stream`, (stream, cancelEvent) => {
         // Append output to selected task content or cancel event if task is not running anymore
         if (stream.status == pipelineTaskStatus.running) {
             selectedTask.value.content += stream.output
