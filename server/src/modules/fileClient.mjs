@@ -1,38 +1,5 @@
 import fs from 'fs';
 import config from '../server.config.mjs';
-import { createFolder, copyFolderContent, isFolderGitRepository, removeFolder } from '../helpers/gitHelper.mjs';
-import git from '@npmcli/git';
-
-export async function cloneRepository(url, branch, folderName) {
-    createFolder(config.defaultRepoFolderPath)
-
-    console.log(url, folderName)
-    var folderPath = `${config.defaultRepoFolderPath}/${folderName}`
-    if(isFolderGitRepository(folderPath)) {
-        console.log("Folder already is a git repository")
-    } else {
-        await git.clone(url, branch, folderPath)
-    }
-}
-
-export async function pullRepository(folderName) {
-    var isSuccessful = false
-    var folderPath = `${config.defaultRepoFolderPath}/${folderName}`
-    console.log(folderPath)
-    if(isFolderGitRepository(folderPath)) {
-        await git.spawn(['pull'], {cwd: folderPath})
-            .then(response => {
-                isSuccessful = response.stdout != 'Already up to date.'
-            })
-            .catch(error => {
-                console.log(error)
-            })
-    } else {
-        console.log("Folder is not a git repository")
-    }
-
-    return isSuccessful
-}
 
 export async function removeRepositoryFolder(folderName) {
     var folderPath = `${config.defaultRepoFolderPath}/${folderName}`
@@ -99,4 +66,27 @@ export function prepareWorkerFolder(projectName, uniqueId='') {
 export function removeWorkerFolder(projectName) {
     var folderPath = `${config.defaultWorkerFolderPath}/${projectName}`
     removeFolder(folderPath)
+}
+
+export function createFolder(path){
+    if(!fs.existsSync(path)) {
+        fs.mkdirSync(path);
+    }
+}
+
+export function removeFolder(path){
+    if(fs.existsSync(path)){
+        fs.rmSync(path, {recursive: true});
+    }
+}
+
+export function copyFolderContent(src, dest){
+    if(fs.existsSync(src) && fs.existsSync(dest)){ 
+        fs.cpSync(src, dest, {recursive: true});
+    }
+}
+
+export function isFolderGitRepository(path) {
+    const folderPath = `${path}/.git`;
+    return fs.existsSync(folderPath);
 }

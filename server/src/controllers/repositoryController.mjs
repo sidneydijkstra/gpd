@@ -2,7 +2,8 @@ import express from 'express'
 import { getGithubRepository } from "../modules/githubApi.mjs"
 import { getGitlabRepository } from "../modules/gitlabApi.mjs"
 import { getRepositories, getRepositoryByGuid, addRepository, updateRepository, removeRepositoryByGuid } from '../modules/database/repositories.mjs'
-import { cloneRepository, pullRepository, removeRepositoryFolder } from '../modules/fileClient.mjs'
+import { removeRepositoryFolder } from '../modules/fileClient.mjs'
+import { cloneRepository, pullRepository } from '../modules/gitClient.mjs'
 
 const router = express.Router()
 

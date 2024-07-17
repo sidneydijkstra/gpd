@@ -7,7 +7,7 @@ import { spawn } from 'child_process';
 import pipelineStatus from '../../enums/pipelineStatus.mjs';
 import pipelineTaskStatus from '../../enums/pipelineTaskStatus.mjs';
 
-export function initializeListener(){
+export default function initializeListener(){
     mqttServer.on('publish', async (packet, client) => {
         // Check if message is from client
         if(!client)

@@ -9,8 +9,8 @@ import fileRouter from './src/controllers/fileController.mjs'
 import pipelineRouter from './src/controllers/pipelineController.mjs'
 
 import initializeMqtt from './src/modules/mqtt/mqttServer.mjs'
-import { initializeListener } from './src/modules/agent/agent.mjs'
-import { checkRepositories } from './src/modules/agent/repoChecker.mjs'
+import initializeListener from './src/modules/agent/agent.mjs'
+import initializeChecker from './src/modules/agent/checker.mjs'
 
 const app = express()
 const port = 3000
@@ -29,4 +29,4 @@ app.listen(port, () => {
 
 initializeMqtt()
 initializeListener()
-checkRepositories()
+initializeChecker()

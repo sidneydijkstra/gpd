@@ -1,7 +1,7 @@
 import express from 'express'
 import { getRepositoryByGuid } from '../modules/database/repositories.mjs'
 import { getAllGlobalSettings, updateGlobalSetting, getAllRepositorySettings, updateRepositorySetting } from '../modules/database/settings.mjs'
-import { isDockerInstalled } from '../modules/dockerApi.mjs'
+import { isDockerInstalled } from '../modules/dockerClient.mjs'
 
 const router = express.Router()
 

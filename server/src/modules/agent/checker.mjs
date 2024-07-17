@@ -1,5 +1,5 @@
 import { getRepositories } from '../database/repositories.mjs'
-import { pullRepository } from '../fileClient.mjs'
+import { pullRepository } from '../gitClient.mjs'
 
 import config from '../../server.config.mjs'
 
@@ -7,7 +7,7 @@ function sleep(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
 }
 
-export async function checkRepositories(){
+export default async function initializeChecker(){
     while(true) {
         await getRepositories()
             .then(async response => {
