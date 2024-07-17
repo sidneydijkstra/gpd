@@ -43,6 +43,7 @@ import { open } from 'sqlite'
             pipelineId integer NOT NULL,
             repoId integer NOT NULL,
             type varchar(255) NOT NULL,
+            config text NOT NULL,
             completed boolean NOT NULL,
             status varchar(255) NOT NULL,
             content text,

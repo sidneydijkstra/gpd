@@ -20,11 +20,11 @@ export default function initializeMqtt(){
     })
     
     mqttServer.on('subscribe', function (subscriptions, client) {
-        console.log('[MQTT] Client subscribed to topics: ', subscriptions)
+        // console.log('[MQTT] Client subscribed to topics: ', subscriptions)
     })
     
     mqttServer.on('unsubscribe', function (subscriptions, client) {
-        console.log('[MQTT] Client unsubscribed to topics: ', subscriptions)
+        // console.log('[MQTT] Client unsubscribed to topics: ', subscriptions)
     })
     
     mqttServer.on('client', function (client) {
@@ -36,11 +36,11 @@ export default function initializeMqtt(){
     })
     
     mqttServer.on('publish', async function (packet, client) {
-        if (client) {
-            console.log('[MQTT] Client published message: ', packet.payload.toString())
-        }else{
-            console.log('[MQTT] Message published: ', packet.payload.toString())
-        }    
+        // if (client) {
+        //     console.log('[MQTT] Client published message: ', packet.payload.toString())
+        // }else{
+        //     console.log('[MQTT] Message published: ', packet.payload.toString())
+        // }    
     })
 }
 

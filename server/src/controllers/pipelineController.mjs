@@ -4,6 +4,7 @@ import { getPipelinesByRepository, getPipelineByGuid, addPipeline, updatePipelin
 import pipelineStatus from '../enums/pipelineStatus.mjs'
 
 import { spawnRunner } from '../modules/runner/spawnRunner.mjs'
+import { runPipeline } from '../modules/agent/agent.mjs'
 
 const router = express.Router()
 
@@ -20,17 +21,13 @@ router.post('/api/pipeline/:guid/run', async (req, res) => {
         return
     }
 
-    await addPipelineTransaction(pipeline.id, repository.id, 'Manual Run', false, pipelineStatus.running, '')
-        .then(async response => {
-            spawnRunner(response, repository.guid, pipeline.guid, async (success) => {
-                await updatePipelineTransaction(response, true, success ? pipelineStatus.completed : pipelineStatus.failed, '')
-            })
+    var guid = await runPipeline(repository, pipeline, 'Manual Run')
+    if(guid == null){
+        res.status(500).json({message: 'Error running pipeline'})
+        return
+    }
 
-            res.status(200).json({guid: response})
-        })
-        .catch(error => {
-            res.status(500).json({message: error})
-        })
+    res.status(200).json({guid: guid})
 })
 
 router.get('/api/pipeline/:guid', async (req, res) => {
@@ -108,6 +105,21 @@ router.get('/api/pipeline/:guid/transaction', async (req, res) => {
     res.status(200).json(transactions)
 })
 
+router.get('/api/pipeline/:guid/transaction/:transactionGuid', async (req, res) => {
+    var pipeline = await getPipelineByGuid(req.params.guid)
+    if(pipeline == null){
+        res.status(404).json({message: 'Pipeline not found'})
+        return
+    }
+
+    var transaction = await getPipelineTransactionByGuid(req.params.transactionGuid)
+    if(transaction == null){
+        res.status(404).json({message: 'Transaction not found'})
+        return
+    }
+
+    res.status(200).json(transaction)
+})
 
 router.get('/api/pipeline/:guid/transaction/:transactionGuid/task', async (req, res) => {
     var pipeline = await getPipelineByGuid(req.params.guid)

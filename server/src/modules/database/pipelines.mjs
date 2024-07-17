@@ -118,18 +118,19 @@ export function getPipelineTransactionByGuid(guid){
     })
 }
 
-export function addPipelineTransaction(pipelineId, repoId, type, completed, status, content){
+export function addPipelineTransaction(pipelineId, repoId, type, config, completed, status, content){
     return new Promise(async (resolve, reject) => {
         await getConnection()
           .then(async conn => {
             var guid = v4() // generate guid
             var parsedContent = JSON.stringify(content)
   
-            var result = await conn.all(`insert into pipeline_transactions values (null, ?, ?, ?, ?, ?, ?, ?, datetime('now'))`, [
+            var result = await conn.all(`insert into pipeline_transactions values (null, ?, ?, ?, ?, ?, ?, ?, ?, datetime('now'))`, [
                 guid,
                 pipelineId,
                 repoId,
                 type,
+                config,
                 completed,
                 status,
                 parsedContent
