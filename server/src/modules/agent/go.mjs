@@ -1,8 +1,8 @@
 
-import { FileLogger } from '../runner/logger.mjs';
+import { FileLogger } from './logger.mjs';
 import useMqttClient from '../mqtt/mqttClient.mjs';
 import { getTransaction, getTransactionTasks } from './serverApi.mjs';
-import { jobs as storedJobs } from '../runner/jobs/index.mjs';
+import { jobs as storedJobs } from './jobs/index.mjs';
 import YAML from 'yaml'
 
 import pipelineStatus from '../../enums/pipelineStatus.mjs';

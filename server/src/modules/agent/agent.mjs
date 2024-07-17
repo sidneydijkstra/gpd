@@ -1,6 +1,6 @@
 import { mqttServer } from '../mqtt/mqttServer.mjs';
 import { prepareWorkerFolder } from '../fileClient.mjs';
-import { parseConfigString } from '../runner/configParser.mjs';
+import { parseConfigString } from './configParser.mjs';
 import { addPipelineTask, addPipelineTransaction, updatePipelineTask, updatePipelineTransaction, getPipelineTransactionByGuid } from '../database/pipelines.mjs';
 import { spawn } from 'child_process';
 
@@ -39,13 +39,10 @@ export function initializeListener(){
 
 export async function runPipeline(repository, pipeline, type='Manual Run'){
     var guid = null
-    console.log('Running', repository, pipeline, type)
     // Create the pipeline transaction
     await addPipelineTransaction(pipeline.id, repository.id, type, pipeline.content, false, pipelineStatus.pending, '')
         .then(async transactionGuid => {
-            console.log(`in transaction ${transactionGuid}`)
             var agent = await prepareAgent(transactionGuid, repository, pipeline.content)
-            console.log(`prepared agent ${agent}`)
             
             // Check if the agent was prepared
             if(agent == null){
@@ -106,7 +103,6 @@ async function prepareAgent(transactionGuid, repository, config){
 
 function spawnAgent(agentGuid, workFolderPath, pipelineGuid, transactionGuid){
     var command = `node ./src/modules/agent/go.mjs ${agentGuid} ${workFolderPath} ${pipelineGuid} ${transactionGuid}`
-    console.log(command)
 
     const child = spawn(command, [], { shell: true, cwd: process.cwd()})
 

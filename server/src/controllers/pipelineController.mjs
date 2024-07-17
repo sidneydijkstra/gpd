@@ -1,9 +1,7 @@
 import express from 'express'
 import { getRepositoryByGuid, getRepositoryById } from '../modules/database/repositories.mjs'
 import { getPipelinesByRepository, getPipelineByGuid, addPipeline, updatePipeline, removePipeline, getPipelineTransactions, addPipelineTransaction, getPipelineTasks, getPipelineTaskByGuid, getPipelineTransactionByGuid, updatePipelineTransaction } from '../modules/database/pipelines.mjs'
-import pipelineStatus from '../enums/pipelineStatus.mjs'
 
-import { spawnRunner } from '../modules/runner/spawnRunner.mjs'
 import { runPipeline } from '../modules/agent/agent.mjs'
 
 const router = express.Router()
