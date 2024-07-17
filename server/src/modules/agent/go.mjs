@@ -59,7 +59,6 @@ async function executeAgent(agentGuid, workFolderPath, pipelineGuid, transaction
     // Get the config
     var jobConfig = transaction.config.replace(/\\n/g, '\n').replace(/\\"/g, '\"').slice(1,-1)
     var parsedConfig = YAML.parse(jobConfig)
-    console.log(parsedConfig)
     var jobs = parsedConfig.jobs
     
     // Loop over all jobs
