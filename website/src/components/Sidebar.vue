@@ -28,7 +28,7 @@ const items = [
     {
         label: 'Settings',
         icon: 'pi pi-cog',
-        command: () => navigateTo('pipe')
+        command: () => navigateTo('settings')
     }
 ];
 

@@ -102,19 +102,28 @@ async function prepareAgent(transactionGuid, repository, config){
 }
 
 function spawnAgent(agentGuid, workFolderPath, pipelineGuid, transactionGuid){
-    var command = `node ./src/modules/agent/go.mjs ${agentGuid} ${workFolderPath} ${pipelineGuid} ${transactionGuid}`
+    mqttServer.publish({
+        topic: 'agent/exec',
+        payload: Buffer.from(JSON.stringify({
+            agentGuid: agentGuid,
+            workFolderPath: `/workdir${workFolderPath.substring(8)}`,
+            pipelineGuid: pipelineGuid,
+            transactionGuid: transactionGuid
+        }))
+    })
+    // var command = `node ./src/modules/agent/go.mjs ${agentGuid} ${workFolderPath} ${pipelineGuid} ${transactionGuid}`
 
-    const child = spawn(command, [], { shell: true, cwd: process.cwd()})
+    // const child = spawn(command, [], { shell: true, cwd: process.cwd()})
 
-    child.stdout.on('data', (data) => {
-        console.log(`[spawnRunner] stdout: ${data}`);
-    });
+    // child.stdout.on('data', (data) => {
+    //     console.log(`[spawnRunner] stdout: ${data}`);
+    // });
     
-    child.stderr.on('data', (data) => {
-        console.error(`[spawnRunner] stderr: ${data}`);
-    });
+    // child.stderr.on('data', (data) => {
+    //     console.error(`[spawnRunner] stderr: ${data}`);
+    // });
 
-    child.on('close', async (code) => {
-        console.log(`[spawnRunner] Process exited with code ${code}`);
-    }); 
+    // child.on('close', async (code) => {
+    //     console.log(`[spawnRunner] Process exited with code ${code}`);
+    // }); 
 }

@@ -1,6 +1,6 @@
 import express from 'express'
 import { getRepositoryByGuid } from '../modules/database/repositories.mjs'
-import { getAllGlobalSettings, updateGlobalSetting, getAllRepositorySettings, updateRepositorySetting } from '../modules/database/settings.mjs'
+import { getAllGlobalSettings, updateGlobalSetting, getAllRepositorySettings, updateRepositorySetting, addGlobalSetting, getGlobalSetting, getRepositorySetting, addRepositorySetting } from '../modules/database/settings.mjs'
 import { isDockerInstalled } from '../modules/dockerClient.mjs'
 
 const router = express.Router()
@@ -41,13 +41,25 @@ router.post(`/api/setting/global/:key`, async (req, res) => {
         return
     }
 
-    updateGlobalSetting(req.params.key, req.body.value)
-        .then(response => {
-            res.status(200).json(response)
-        })
-        .catch(_ => {
-            res.status(404).json({message: 'Setting not found'})
-        })
+    var setting = await getGlobalSetting(req.params.key)
+
+    if(setting == null){
+        addGlobalSetting(req.params.key, req.body.value)
+            .then(response => {
+                res.status(200).json(response)
+            })
+            .catch(_ => {
+                res.status(404).json({message: 'Setting not found'})
+            })
+    }else{
+        updateGlobalSetting(req.params.key, req.body.value)
+            .then(response => {
+                res.status(200).json(response)
+            })
+            .catch(_ => {
+                res.status(404).json({message: 'Setting not found'})
+            })
+    }
 })
 
 router.get('/api/setting/repository/:guid', async (req, res) => {
@@ -94,13 +106,25 @@ router.post('/api/setting/repository/:guid/:key', async (req, res) => {
         return
     }
 
-    updateRepositorySetting(repo.id, req.params.key, req.body.value)
-        .then(response => {
-            res.status(200).json(response)
-        })
-        .catch(_ => {
-            res.status(404).json({message: 'Setting not found'})
-        })
+    var setting = await getRepositorySetting(repo.id, req.params.key)
+
+    if(setting == null){
+        addRepositorySetting(repo.id, req.params.key, req.body.value)
+            .then(response => {
+                res.status(200).json(response)
+            })
+            .catch(_ => {
+                res.status(404).json({message: 'Setting not found'})
+            })
+    } else{
+        updateRepositorySetting(repo.id, req.params.key, req.body.value)
+            .then(response => {
+                res.status(200).json(response)
+            })
+            .catch(_ => {
+                res.status(404).json({message: 'Setting not found'})
+            })
+    }
 })
 
 

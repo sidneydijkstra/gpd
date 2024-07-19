@@ -1,7 +1,7 @@
 import { spawn } from 'child_process';
 
 export function isDockerInstalled() {
-    return execute('docker --version')
+    return execute('docker ps')
 }
 
 export function pullImage(image) {

@@ -6,6 +6,27 @@ const apiClient = generateAPI("http://localhost:3000/api", {
     },
 });
 
+export async function getSettings(repoGuid=null){
+    // Get the global settings
+    var globalSettings = apiClient.setting.global.get()
+    // If a repository guid is provided, get the repository settings
+    var repositorySettings = repoGuid == null ? Promise.resolve([]) : apiClient.setting.repository[`${repoGuid}`].get()
+    // Return the global and repository as a single array inside a promise
+    return Promise.all([globalSettings, repositorySettings]).then((settings) => settings[0].concat(settings[1]))
+}
+
+export async function updateSetting(key, value){
+    return apiClient.setting.global[`${key}`].post({
+        value: value
+    })
+}
+
+export async function updateRepositorySetting(repoGuid, key, value){
+    return apiClient.setting.repository[`${repoGuid}`][`${key}`].post({
+        value: value
+    })
+}
+
 export async function getStoredRepositories(){
     return apiClient.repository.get()
 }
