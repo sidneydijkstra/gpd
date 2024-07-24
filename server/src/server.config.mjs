@@ -12,6 +12,7 @@ const config = {
 
     mqttServerPort: 8888,
     mqttServerUrl: 'ws://192.168.1.2:8888',
+    apiServerUrl: 'http://192.168.1.2:3000/api',
 
     DEBUG_MODE: true
 }

@@ -2,6 +2,7 @@ import express from 'express'
 import { getRepositoryByGuid } from '../modules/database/repositories.mjs'
 import { getAllGlobalSettings, updateGlobalSetting, getAllRepositorySettings, updateRepositorySetting, addGlobalSetting, getGlobalSetting, getRepositorySetting, addRepositorySetting } from '../modules/database/settings.mjs'
 import { isDockerInstalled } from '../modules/dockerClient.mjs'
+import { checkLocalAgent } from '../modules/agent/agent.mjs'
 
 const router = express.Router()
 
@@ -44,7 +45,7 @@ router.post(`/api/setting/global/:key`, async (req, res) => {
     var setting = await getGlobalSetting(req.params.key)
 
     if(setting == null){
-        addGlobalSetting(req.params.key, req.body.value)
+        await addGlobalSetting(req.params.key, req.body.value)
             .then(response => {
                 res.status(200).json(response)
             })
@@ -52,7 +53,7 @@ router.post(`/api/setting/global/:key`, async (req, res) => {
                 res.status(404).json({message: 'Setting not found'})
             })
     }else{
-        updateGlobalSetting(req.params.key, req.body.value)
+        await updateGlobalSetting(req.params.key, req.body.value)
             .then(response => {
                 res.status(200).json(response)
             })
@@ -60,6 +61,9 @@ router.post(`/api/setting/global/:key`, async (req, res) => {
                 res.status(404).json({message: 'Setting not found'})
             })
     }
+    
+    // Check if the mode is changed to local
+    checkLocalAgent()
 })
 
 router.get('/api/setting/repository/:guid', async (req, res) => {

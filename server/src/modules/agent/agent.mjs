@@ -1,19 +1,50 @@
+import { spawn } from 'gpd-agent'
 import { mqttServer } from '../mqtt/mqttServer.mjs';
+import { onExit } from '../../helpers/processHelper.mjs';
 import { prepareWorkerFolder } from '../fileClient.mjs';
 import { parseConfigString } from './configParser.mjs';
 import { addPipelineTask, addPipelineTransaction, updatePipelineTask, updatePipelineTransaction, getPipelineTransactionByGuid } from '../database/pipelines.mjs';
-import { spawn } from 'child_process';
+import { getGlobalSetting } from '../database/settings.mjs';
 
 import pipelineStatus from '../../enums/pipelineStatus.mjs';
 import pipelineTaskStatus from '../../enums/pipelineTaskStatus.mjs';
+import agentModes from '../../enums/agentModes.mjs';
 
-export default function initializeListener(){
+import config from '../../server.config.mjs';
+
+const agentCache = []
+
+onExit(() => {
+    stopLocalAgent()
+})
+
+export default async function initializeListener(){
     mqttServer.on('publish', async (packet, client) => {
         // Check if message is from client
         if(!client)
             return
 
         var parsedTopic = packet.topic.split('/')
+
+        // Add agent to cache
+        if(parsedTopic.length == 2 && parsedTopic[0] == 'agent' && parsedTopic[1] == 'register'){
+            var agentGuid = packet.payload.toString()
+            console.log(`[agent] Registered agent: ${agentGuid}`)
+            agentCache.push({
+                name: agentGuid,
+                running: false
+            })
+        }
+        // Remove agent from cache
+        else if (parsedTopic.length == 2 && parsedTopic[0] == 'agent' && parsedTopic[1] == 'unregister'){
+            var agentGuid = packet.payload.toString()
+            if(agentCache.length == 0 || !agentCache.find(x => x.name == agentGuid))
+                return
+
+            console.log(`[agent] Unregistered agent: ${agentGuid}`)
+            agentCache.splice(agentCache.findIndex(x => x.name == agentGuid), 1)
+        }
+
         if(parsedTopic.length != 3)
             return
 
@@ -21,10 +52,22 @@ export default function initializeListener(){
             var agentGuid = parsedTopic[1]
             var transaction = JSON.parse(packet.payload.toString())
             await updatePipelineTransaction(transaction.guid, false, transaction.status, transaction.content ?? '')
+
+            // Update agent status
+            var agent = agentCache.find(x => x.name == agentGuid)
+            if(agent != null)
+                agent.running = true
+
         }else if(parsedTopic[0] == 'agent' && parsedTopic[2] == 'trans-completed'){
             var agentGuid = parsedTopic[1]
             var transaction = JSON.parse(packet.payload.toString())
             await updatePipelineTransaction(transaction.guid, true, transaction.status, transaction.content ?? '')
+            
+            // Update agent status
+            var agent = agentCache.find(x => x.name == agentGuid)
+            if(agent != null)
+                agent.running = false
+
         }else if(parsedTopic[0] == 'agent' && parsedTopic[2] == 'task-running'){
             var agentGuid = parsedTopic[1]
             var task = JSON.parse(packet.payload.toString())
@@ -35,6 +78,12 @@ export default function initializeListener(){
             await updatePipelineTask(task.guid, false, task.status, task.content ?? '')
         }
     })
+
+    
+    var mode = await getGlobalSetting('mode')
+    if(mode != null && mode.value == agentModes.local){
+        startLocalAgent()
+    }
 }
 
 export async function runPipeline(repository, pipeline, type='Manual Run'){
@@ -47,7 +96,7 @@ export async function runPipeline(repository, pipeline, type='Manual Run'){
             // Check if the agent was prepared
             if(agent == null){
                 // Update the transaction status, and return false
-                await updatePipelineTransaction(transactionGuid, pipelineStatus.error, 'Error preparing agent')
+                await updatePipelineTransaction(transactionGuid, true, pipelineStatus.error, 'Error preparing agent')
                     .then(() => {
                         guid = transactionGuid
                     })
@@ -55,8 +104,12 @@ export async function runPipeline(repository, pipeline, type='Manual Run'){
             }
 
             // Create the agent process
-            spawnAgent('local', agent.path, pipeline.guid, transactionGuid)
-
+            var spawnAgentResult = await spawnAgent(agent.path, pipeline.guid, transactionGuid)
+            if(!spawnAgentResult){
+                // Update the transaction status, and return false
+                await updatePipelineTransaction(transactionGuid, true, pipelineStatus.failed, 'Error spawning agent')
+            }
+            
             guid = transactionGuid
         })
 
@@ -101,29 +154,62 @@ async function prepareAgent(transactionGuid, repository, config){
     }
 }
 
-function spawnAgent(agentGuid, workFolderPath, pipelineGuid, transactionGuid){
+async function spawnAgent(workFolderPath, pipelineGuid, transactionGuid){
+    if(agentCache.length == 0){
+        console.log('[agent] No agents available')
+        return false
+    }
+
+    var mode = await getGlobalSetting('mode')
+    if(mode == null || mode.value == '' || mode.value == agentModes.none){
+        console.log('[agent] Mode set to None')
+        return false
+    }
+
+    var workFolderPath = mode.value == agentModes.docker ? `/workdir${workFolderPath.substring(8)}` : `${process.cwd()}${workFolderPath.substring(1)}`
+    var agentGuid = mode.value == agentModes.local ? 'local' : agentCache.find(x => x.running == false)?.name ?? agentCache[0].name
+
+    console.log(`[agent] Sending pipeline to agent: ${agentGuid}`)
+
     mqttServer.publish({
         topic: 'agent/exec',
         payload: Buffer.from(JSON.stringify({
             agentGuid: agentGuid,
-            workFolderPath: `/workdir${workFolderPath.substring(8)}`,
+            workFolderPath: workFolderPath,
             pipelineGuid: pipelineGuid,
             transactionGuid: transactionGuid
         }))
     })
-    // var command = `node ./src/modules/agent/go.mjs ${agentGuid} ${workFolderPath} ${pipelineGuid} ${transactionGuid}`
 
-    // const child = spawn(command, [], { shell: true, cwd: process.cwd()})
+    return true
+}
 
-    // child.stdout.on('data', (data) => {
-    //     console.log(`[spawnRunner] stdout: ${data}`);
-    // });
+export async function checkLocalAgent(){
+    var mode = await getGlobalSetting('mode')
+    if(mode != null && mode.value == agentModes.local){
+        startLocalAgent()
+    }else{
+        stopLocalAgent()
+    }
+}
+
+export function startLocalAgent(){
+    if(agentCache.find(x => x.name == 'local'))
+        return
+
+    console.log('[agent] Starting local agent')
+    spawn(config.mqttServerUrl, config.apiServerUrl, 'local', false)
+}
+
+export function stopLocalAgent(){
+    if(!agentCache.find(x => x.name == 'local'))
+        return
+
+    console.log('[agent] Stopping local agent')
+    mqttServer.publish({
+        topic: 'agent/quit',
+        payload: Buffer.from('local')
+    })
     
-    // child.stderr.on('data', (data) => {
-    //     console.error(`[spawnRunner] stderr: ${data}`);
-    // });
-
-    // child.on('close', async (code) => {
-    //     console.log(`[spawnRunner] Process exited with code ${code}`);
-    // }); 
+    agentCache.splice(agentCache.findIndex(x => x.name == 'local'), 1)
 }
