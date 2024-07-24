@@ -9,7 +9,7 @@ import fileRouter from './src/controllers/fileController.mjs'
 import pipelineRouter from './src/controllers/pipelineController.mjs'
 
 import initializeMqtt from './src/modules/mqtt/mqttServer.mjs'
-import initializeListener from './src/modules/agent/agent.mjs'
+import initializeListener from './src/modules/agent.mjs'
 import initializeChecker from './src/modules/checker.mjs'
 
 const app = express()

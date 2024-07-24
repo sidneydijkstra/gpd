@@ -1,16 +1,16 @@
 import { spawn } from 'gpd-agent'
-import { mqttServer } from '../mqtt/mqttServer.mjs';
-import { onExit } from '../../helpers/processHelper.mjs';
-import { prepareWorkerFolder } from '../fileClient.mjs';
-import { parseConfigString } from './configParser.mjs';
-import { addPipelineTask, addPipelineTransaction, updatePipelineTask, updatePipelineTransaction, getPipelineTransactionByGuid } from '../database/pipelines.mjs';
-import { getGlobalSetting } from '../database/settings.mjs';
+import { mqttServer } from './mqtt/mqttServer.mjs';
+import { onExit } from '../helpers/processHelper.mjs';
+import { prepareWorkerFolder } from './fileClient.mjs';
+import { parseConfigString } from '../helpers/configParser.mjs';
+import { addPipelineTask, addPipelineTransaction, updatePipelineTask, updatePipelineTransaction, getPipelineTransactionByGuid } from './database/pipelines.mjs';
+import { getGlobalSetting } from './database/settings.mjs';
 
-import pipelineStatus from '../../enums/pipelineStatus.mjs';
-import pipelineTaskStatus from '../../enums/pipelineTaskStatus.mjs';
-import agentModes from '../../enums/agentModes.mjs';
+import pipelineStatus from '../enums/pipelineStatus.mjs';
+import pipelineTaskStatus from '../enums/pipelineTaskStatus.mjs';
+import agentModes from '../enums/agentModes.mjs';
 
-import config from '../../server.config.mjs';
+import config from '../server.config.mjs';
 
 const agentCache = []
 
