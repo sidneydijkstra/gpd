@@ -3,14 +3,14 @@ import express from 'express'
 import cors from 'cors'
 import bodyParser from 'body-parser'
 
-import repositoryRouter from './src/controllers/repositoryController.mjs'
-import settingRouter from './src/controllers/settingController.mjs'
-import fileRouter from './src/controllers/fileController.mjs'
-import pipelineRouter from './src/controllers/pipelineController.mjs'
+import repositoryRouter from './src/controllers/repositoryController.js'
+import settingRouter from './src/controllers/settingController.js'
+import fileRouter from './src/controllers/fileController.js'
+import pipelineRouter from './src/controllers/pipelineController.js'
 
-import initializeMqtt from './src/modules/mqtt/mqttServer.mjs'
-import initializeListener from './src/modules/agent.mjs'
-import initializeChecker from './src/modules/checker.mjs'
+import initializeMqtt from './src/modules/mqtt/mqttServer.js'
+import initializeListener from './src/modules/agent.js'
+import initializeChecker from './src/modules/checker.js'
 
 const app = express()
 const port = 3000

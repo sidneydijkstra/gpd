@@ -1,7 +1,7 @@
 import aedes from 'aedes'
 import { createServer } from 'aedes-server-factory'
 
-import config from "../../server.config.mjs"
+import config from "#src/server.config.js"
 
 const mqttServer = aedes()
 const server = createServer(mqttServer, { ws: true})

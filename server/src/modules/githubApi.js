@@ -1,5 +1,5 @@
-import config from "../server.config.mjs";
-import { useGenerateApi } from "./useGenerateApi.mjs";
+import config from "#src/server.config.js";
+import { useGenerateApi } from "#src/modules/useGenerateApi.js";
 
 const githubToken = process.env.GITHUB_API_KEY;
 

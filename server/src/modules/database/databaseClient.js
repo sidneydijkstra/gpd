@@ -1,7 +1,7 @@
 import sqlite3 from 'sqlite3'
 import { open } from 'sqlite'
 
-import config from '../../server.config.mjs'
+import config from '#src/server.config.js'
 
 export function getConnection () {
   return open({

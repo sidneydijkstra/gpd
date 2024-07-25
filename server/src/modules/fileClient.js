@@ -1,5 +1,5 @@
 import fs from 'fs';
-import config from '../server.config.mjs';
+import config from '#src/server.config.js';
 
 export async function removeRepositoryFolder(folderName) {
     var folderPath = `${config.defaultRepoFolderPath}/${folderName}`

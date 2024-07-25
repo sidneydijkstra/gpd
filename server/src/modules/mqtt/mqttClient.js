@@ -1,6 +1,6 @@
 import mqtt from "mqtt"
 
-import config from "../../server.config.mjs"
+import config from "../../server.config.js"
 
 export default function useMqttClient(){
     const mqttClient = mqtt.connect(config.mqttServerUrl)

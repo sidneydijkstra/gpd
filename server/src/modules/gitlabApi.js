@@ -1,5 +1,5 @@
-import config from "../server.config.mjs";
-import { useGenerateApi } from "./useGenerateApi.mjs";
+import config from "#src/server.config.js";
+import { useGenerateApi } from "#src/modules/useGenerateApi.js";
 
 const gitlabToken = process.env.GITLAB_API_KEY;
 

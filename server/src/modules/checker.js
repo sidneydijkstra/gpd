@@ -1,7 +1,7 @@
-import { getRepositories } from './database/repositories.mjs'
-import { pullRepository } from './gitClient.mjs'
+import { getRepositories } from '#src/modules/database/repositories.js'
+import { pullRepository } from '#src/modules/gitClient.js'
 
-import config from '../server.config.mjs'
+import config from '#src/server.config.js'
 
 function sleep(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));

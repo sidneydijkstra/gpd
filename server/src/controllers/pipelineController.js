@@ -1,8 +1,8 @@
 import express from 'express'
-import { getRepositoryByGuid, getRepositoryById } from '../modules/database/repositories.mjs'
-import { getPipelinesByRepository, getPipelineByGuid, addPipeline, updatePipeline, removePipeline, getPipelineTransactions, addPipelineTransaction, getPipelineTasks, getPipelineTaskByGuid, getPipelineTransactionByGuid, updatePipelineTransaction } from '../modules/database/pipelines.mjs'
+import { getRepositoryByGuid, getRepositoryById } from '#src/modules/database/repositories.js'
+import { getPipelinesByRepository, getPipelineByGuid, addPipeline, updatePipeline, removePipeline, getPipelineTransactions, addPipelineTransaction, getPipelineTasks, getPipelineTaskByGuid, getPipelineTransactionByGuid, updatePipelineTransaction } from '#src/modules/database/pipelines.js'
 
-import { runPipeline } from '../modules/agent.mjs'
+import { runPipeline } from '#src/modules/agent.js'
 
 const router = express.Router()
 

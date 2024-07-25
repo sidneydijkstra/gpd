@@ -1,5 +1,5 @@
-import { createFolder, isFolderGitRepository } from './fileClient.mjs'
-import config from '../server.config.mjs';
+import { createFolder, isFolderGitRepository } from '#src/modules/fileClient.js'
+import config from '#src/server.config.js';
 import git from '@npmcli/git';
 
 export async function cloneRepository(url, branch, folderName) {

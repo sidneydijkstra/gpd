@@ -3,8 +3,12 @@
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
+  "type": "module",
+  "imports": {
+    "#src/*.js": "./src/*.js"
+  },
   "scripts": {
-    "dev": "nodemon index.mjs"
+    "dev": "nodemon index.js"
   },
   "dependencies": {
     "@npmcli/git": "^5.0.7",

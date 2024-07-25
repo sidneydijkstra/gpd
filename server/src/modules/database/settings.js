@@ -1,4 +1,4 @@
-import { getConnection } from "./databaseClient.mjs"
+import { getConnection } from "#src/modules/database/databaseClient.js"
 
 export function getAllSettings(){
     return new Promise(async (resolve, reject) => {
