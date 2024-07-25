@@ -44,6 +44,26 @@ export default function initializeMqtt(){
     })
 }
 
+export function onTopic(topics, callback){
+    var topicLength = topics.length
+    mqttServer.on('publish', async function (packet, client) {
+        if(client == null)
+            return
+
+        var parsedTopic = packet.topic.split('/')
+
+        if(parsedTopic.length != topicLength)
+            return
+
+        for(var topic in topics){
+            if(topics[topic] != parsedTopic[topic] && topics[topic] != '*')
+                return
+        }
+
+        callback(parsedTopic, packet.payload.toString())
+    })
+}
+
 export {
     mqttServer
 };

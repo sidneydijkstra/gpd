@@ -1,10 +1,11 @@
 import { spawn } from 'gpd-agent'
-import { mqttServer } from '#src/modules/mqtt/mqttServer.js';
+import { mqttServer, onTopic } from '#src/modules/mqtt/mqttServer.js';
 import { onExit } from '#src/helpers/processHelper.js';
 import { prepareWorkerFolder } from '#src/modules/fileClient.js';
 import { parseConfigString } from '#src/helpers/configParser.js';
 import { addPipelineTask, addPipelineTransaction, updatePipelineTask, updatePipelineTransaction, getPipelineTransactionByGuid } from '#src/modules/database/pipelines.js';
 import { getGlobalSetting } from '#src/modules/database/settings.js';
+import { addAgent, getAvailableAgent, updateAgent, removeAgent, isAnyAgentAvailable, getAnyAgent, containsAgent } from '#src/modules/manager.js';
 
 import pipelineStatus from '#src/enums/pipelineStatus.js';
 import pipelineTaskStatus from '#src/enums/pipelineTaskStatus.js';
@@ -12,73 +13,61 @@ import agentModes from '#src/enums/agentModes.js';
 
 import config from '#src/server.config.js';
 
-const agentCache = []
-
-onExit(() => {
-    stopLocalAgent()
-})
-
 export default async function initializeListener(){
-    mqttServer.on('publish', async (packet, client) => {
-        // Check if message is from client
-        if(!client)
-            return
-
-        var parsedTopic = packet.topic.split('/')
-
-        // Add agent to cache
-        if(parsedTopic.length == 2 && parsedTopic[0] == 'agent' && parsedTopic[1] == 'register'){
-            var agentGuid = packet.payload.toString()
-            console.log(`[agent] Registered agent: ${agentGuid}`)
-            agentCache.push({
-                name: agentGuid,
-                running: false
-            })
-        }
-        // Remove agent from cache
-        else if (parsedTopic.length == 2 && parsedTopic[0] == 'agent' && parsedTopic[1] == 'unregister'){
-            var agentGuid = packet.payload.toString()
-            if(agentCache.length == 0 || !agentCache.find(x => x.name == agentGuid))
-                return
-
-            console.log(`[agent] Unregistered agent: ${agentGuid}`)
-            agentCache.splice(agentCache.findIndex(x => x.name == agentGuid), 1)
-        }
-
-        if(parsedTopic.length != 3)
-            return
-
-        if(parsedTopic[0] == 'agent' && parsedTopic[2] == 'trans-running'){
-            var agentGuid = parsedTopic[1]
-            var transaction = JSON.parse(packet.payload.toString())
-            await updatePipelineTransaction(transaction.guid, false, transaction.status, transaction.content ?? '')
-
-            // Update agent status
-            var agent = agentCache.find(x => x.name == agentGuid)
-            if(agent != null)
-                agent.running = true
-
-        }else if(parsedTopic[0] == 'agent' && parsedTopic[2] == 'trans-completed'){
-            var agentGuid = parsedTopic[1]
-            var transaction = JSON.parse(packet.payload.toString())
-            await updatePipelineTransaction(transaction.guid, true, transaction.status, transaction.content ?? '')
-            
-            // Update agent status
-            var agent = agentCache.find(x => x.name == agentGuid)
-            if(agent != null)
-                agent.running = false
-
-        }else if(parsedTopic[0] == 'agent' && parsedTopic[2] == 'task-running'){
-            var agentGuid = parsedTopic[1]
-            var task = JSON.parse(packet.payload.toString())
-            await updatePipelineTask(task.guid, false, task.status, task.content ?? '')
-        }else if(parsedTopic[0] == 'agent' && parsedTopic[2] == 'task-completed'){
-            var agentGuid = parsedTopic[1]
-            var task = JSON.parse(packet.payload.toString())
-            await updatePipelineTask(task.guid, false, task.status, task.content ?? '')
-        }
+    // Register agent
+    onTopic(['agent', 'register'], (parsedTopic, payload) => {
+        var agentName = payload
+        console.log(`[agent] Registered agent: ${agentName}`)
+        
+        addAgent(agentName)
     })
 
+    // Unregister agent
+    onTopic(['agent', 'unregister'], (parsedTopic, payload) => {
+        var agentName = payload
+        console.log(`[agent] Unregistered agent: ${agentName}`)
+
+        // Remove the agent
+        removeAgent(agentName)
+    })
+
+    // Agent transaction running
+    onTopic(['agent', '*', 'trans-running'], async (parsedTopic, payload) => {
+        var agentName = parsedTopic[1]
+        var transaction = JSON.parse(payload)
+        await updatePipelineTransaction(transaction.guid, false, transaction.status, transaction.content ?? '')
+
+        // Update agent status
+        updateAgent(agentName, true)
+    })
+
+    // Agent transaction completed
+    onTopic(['agent', '*', 'trans-completed'], async (parsedTopic, payload) => {
+        var agentName = parsedTopic[1]
+        var transaction = JSON.parse(payload)
+        await updatePipelineTransaction(transaction.guid, true, transaction.status, transaction.content ?? '')
+        
+        // Update agent status
+        updateAgent(agentName, false)
+    })
+
+    // Agent task running
+    onTopic(['agent', '*', 'task-running'], async (parsedTopic, payload) => {
+        var agentName = parsedTopic[1]
+        var task = JSON.parse(payload)
+        await updatePipelineTask(task.guid, false, task.status, task.content ?? '')
+    })
+
+    // Agent task completed
+    onTopic(['agent', '*', 'task-completed'], async (parsedTopic, payload) => {
+        var agentName = parsedTopic[1]
+        var task = JSON.parse(payload)
+        await updatePipelineTask(task.guid, false, task.status, task.content ?? '')
+    })
+    
+    onExit(() => {
+        stopLocalAgent()
+    })
     
     var mode = await getGlobalSetting('mode')
     if(mode != null && mode.value == agentModes.local){
@@ -155,7 +144,7 @@ async function prepareAgent(transactionGuid, repository, config){
 }
 
 async function spawnAgent(workFolderPath, pipelineGuid, transactionGuid){
-    if(agentCache.length == 0){
+    if(!isAnyAgentAvailable()){
         console.log('[agent] No agents available')
         return false
     }
@@ -167,7 +156,7 @@ async function spawnAgent(workFolderPath, pipelineGuid, transactionGuid){
     }
 
     var workFolderPath = mode.value == agentModes.docker ? `/workdir${workFolderPath.substring(8)}` : `${process.cwd()}${workFolderPath.substring(1)}`
-    var agentGuid = mode.value == agentModes.local ? 'local' : agentCache.find(x => x.running == false)?.name ?? agentCache[0].name
+    var agentGuid = mode.value == agentModes.local ? 'local' : getAvailableAgent()?.name ?? getAnyAgent().name
 
     console.log(`[agent] Sending pipeline to agent: ${agentGuid}`)
 
@@ -194,7 +183,7 @@ export async function checkLocalAgent(){
 }
 
 export function startLocalAgent(){
-    if(agentCache.find(x => x.name == 'local'))
+    if(containsAgent('local'))
         return
 
     console.log('[agent] Starting local agent')
@@ -202,7 +191,7 @@ export function startLocalAgent(){
 }
 
 export function stopLocalAgent(){
-    if(!agentCache.find(x => x.name == 'local'))
+    if(!containsAgent('local'))
         return
 
     console.log('[agent] Stopping local agent')
@@ -210,6 +199,4 @@ export function stopLocalAgent(){
         topic: 'agent/quit',
         payload: Buffer.from('local')
     })
-    
-    agentCache.splice(agentCache.findIndex(x => x.name == 'local'), 1)
 }
