@@ -2,9 +2,7 @@ import express from 'express'
 import { getGithubRepository } from "#src/modules/githubApi.js"
 import { getGitlabRepository } from "#src/modules/gitlabApi.js"
 import { getRepositories, getRepositoryByGuid, addRepository, updateRepository, removeRepositoryByGuid } from '#src/modules/database/repositories.js'
-import { removeRepositoryFolder } from '#src/modules/fileClient.js'
-import { cloneRepository, pullRepository } from '#src/modules/gitClient.js'
-
+import { cloneRepository, pullRepository, removeRepositoryFolder } from '#src/modules/gitClient.js'
 const router = express.Router()
 
 // Create variable for cashed repositories

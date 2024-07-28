@@ -66,6 +66,15 @@ import { open } from 'sqlite'
             lastUpdated time NOT NULL,
             FOREIGN KEY (transactionId) REFERENCES pipeline_transactions(id) ON DELETE CASCADE
         );
+
+        CREATE TABLE IF NOT EXISTS artifacts (
+            id integer PRIMARY KEY AUTOINCREMENT NOT NULL,
+            guid varchar(255) NOT NULL,
+            transactionId integer NOT NULL,
+            name varchar(255) NOT NULL,
+            path varchar(255) NOT NULL,
+            FOREIGN KEY (transactionId) REFERENCES pipeline_transactions(id) ON DELETE CASCADE
+        );
     `)
 })()
 

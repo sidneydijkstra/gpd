@@ -1,4 +1,4 @@
-import { createFolder, isFolderGitRepository } from '#src/modules/fileClient.js'
+import { createFolder, isFolderGitRepository, removeFolder } from '#src/modules/fileClient.js'
 import config from '#src/server.config.js';
 import git from '@npmcli/git';
 
@@ -31,4 +31,11 @@ export async function pullRepository(folderName) {
     }
 
     return isSuccessful
+}
+
+export async function removeRepositoryFolder(folderName) {
+    var folderPath = `${config.defaultRepoFolderPath}/${folderName}`
+    if(isFolderGitRepository(folderPath)) {
+        removeFolder(folderPath)
+    }
 }

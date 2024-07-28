@@ -1,11 +1,34 @@
 import fs from 'fs';
 import config from '#src/server.config.js';
 
-export async function removeRepositoryFolder(folderName) {
-    var folderPath = `${config.defaultRepoFolderPath}/${folderName}`
-    if(isFolderGitRepository(folderPath)) {
-        fs.rmdirSync(folderPath, {recursive: true})
-    }
+export async function addStorageFromRequest(request, overwriteName = null) {
+    createFolder(config.defaultWorkerFolderPath)
+
+    return new Promise((resolve, reject) => {
+        const boundary = request.headers['content-type'].split('boundary=')[1];
+        const parts = request.body.toString().split(`--${boundary}`);
+        
+        parts.forEach(part => {
+            if (part.includes('Content-Disposition')) {
+              // const nameMatch = part.match(/name="([^"]+)"/);
+              const filenameMatch = part.match(/filename="([^"]+)"/);
+        
+              if (filenameMatch) {
+                const filename = overwriteName == null ? filenameMatch[1] : overwriteName;
+                const fileData = part.split('\r\n\r\n')[1];
+                const filePath = path.join(__dirname, 'uploads', filename);
+        
+                fs.writeFile(filePath, fileData, 'binary', (err) => {
+                  if (err) {
+                    reject(err);
+                  }
+                });
+              }
+            }
+        });
+
+        resolve();
+    });
 }
 
 export function getAllFiles(folderName, path = '') {
@@ -36,36 +59,6 @@ export function getAllFiles(folderName, path = '') {
     } else {
         console.log("Folder is not a git repository")
     }
-}
-
-export function getFileContent(folderName, fileName) {
-    var folderPath = `${config.defaultRepoFolderPath}/${folderName}`
-    if(isFolderGitRepository(folderPath)) {
-        var content = fs.readFileSync(`${folderPath}/${fileName}`, 'utf8')
-        return content
-    } else {
-        console.log("Folder is not a git repository")
-    }
-}
-
-export function prepareWorkerFolder(projectName, uniqueId='') {
-    createFolder(config.defaultWorkerFolderPath)
-
-    var folderPath = `${config.defaultWorkerFolderPath}/${projectName}-${uniqueId}`
-    createFolder(folderPath)
-    createFolder(`${folderPath}/project`)
-    createFolder(`${folderPath}/storage`)
-    createFolder(`${folderPath}/artifacts`)
-
-    var projectPath = `${config.defaultRepoFolderPath}/${projectName}`
-    copyFolderContent(projectPath, `${folderPath}/project`)
-
-    return folderPath
-}
-
-export function removeWorkerFolder(projectName) {
-    var folderPath = `${config.defaultWorkerFolderPath}/${projectName}`
-    removeFolder(folderPath)
 }
 
 export function createFolder(path){
