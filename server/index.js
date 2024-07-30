@@ -8,6 +8,7 @@ import settingRouter from './src/controllers/settingController.js'
 import fileRouter from './src/controllers/fileController.js'
 import pipelineRouter from './src/controllers/pipelineController.js'
 import workerRouter from './src/controllers/workerController.js'
+import agentRouter from './src/controllers/agentController.js'
 
 import initializeMqtt from './src/modules/mqtt/mqttServer.js'
 import initializeListener from './src/modules/agent.js'
@@ -24,6 +25,7 @@ app.use(settingRouter)
 app.use(fileRouter)
 app.use(pipelineRouter)
 app.use(workerRouter)
+app.use(agentRouter)
 
 app.listen(port, () => {
     console.log(`Example app listening on port ${port}`)

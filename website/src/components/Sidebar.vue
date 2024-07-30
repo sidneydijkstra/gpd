@@ -14,7 +14,7 @@ const homeItems = [
     {
         label: 'Agents',
         icon: 'pi pi-box',
-        command: () => navigateTo()
+        command: () => navigateTo('agents')
     },
     {
         label: 'Global Settings',

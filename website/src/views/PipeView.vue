@@ -1,5 +1,4 @@
 <script setup>
-import DynamicTable from '@/components/Utilities/DynamicTable.vue'
 import { onBeforeMount, onMounted, ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router'
 import { getRepositoryByGuid, getPipelinesByRepository } from '@/modules/serverApi.js'
