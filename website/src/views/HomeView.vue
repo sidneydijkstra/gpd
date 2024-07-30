@@ -54,7 +54,7 @@ onMounted(async () => {
 <template>
     <!-- Add repository card -->
     <div class="row justify-content-center">
-        <div class="col-4">
+        <div class="col-6">
         
           <div class="d-flex justify-content-center">
             <SelectButton v-model="source" :options="sourceOptions" aria-labelledby="basic" />
@@ -76,7 +76,7 @@ onMounted(async () => {
     <br>
 
     <div class="row justify-content-center">
-        <div class="col-4">
+        <div class="col-6">
         <div class="list-group">
             <a v-for="repo in repos" href="#" class="list-group-item list-group-item-action" aria-current="true" v-on:click="onNavigateToRepo(repo.guid)">
                 <div class="d-flex w-100 justify-content-between">

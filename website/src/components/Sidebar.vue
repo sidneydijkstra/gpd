@@ -1,45 +1,78 @@
 <script setup>
+import { computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 
 const route = useRoute()
 const router = useRouter()
 
-const items = [
+const homeItems = [
+    {
+        label: 'Repositories',
+        icon: 'pi pi-folder',
+        command: () => navigateTo()
+    },
+    {
+        label: 'Agents',
+        icon: 'pi pi-box',
+        command: () => navigateTo()
+    },
+    {
+        label: 'Global Settings',
+        icon: 'pi pi-cog',
+        command: () => navigateTo('settings')
+    }
+]
+
+const repoItems = [
+    {
+        label: 'Back',
+        icon: 'pi pi-arrow-left',
+        command: () => navigateTo()
+    },
+    {
+        separator: true
+    },
     {
         label: 'Repository',
         icon: 'pi pi-folder',
-        command: () => navigateTo('repo')
+        command: () => navigateToRepo('repo')
     },
     {
         label: 'Pipelines',
         icon: 'pi pi-box',
-        command: () => navigateTo('pipe')
+        command: () => navigateToRepo('pipe')
     },
     {
         label: 'Artifacts',
         icon: 'pi pi-shopping-bag',
-        command: () => navigateTo('pipe')
+        command: () => navigateToRepo('pipe')
     },
     {
         label: 'Storage',
         icon: 'pi pi-warehouse',
-        command: () => navigateTo('pipe')
+        command: () => navigateToRepo('pipe')
     },
     {
         label: 'Settings',
         icon: 'pi pi-cog',
-        command: () => navigateTo('settings')
+        command: () => navigateToRepo('settings')
     }
 ];
 
-function navigateTo(routeName) {
+function navigateTo(routeName = '') {
+    router.push(`/${routeName}`)
+}
+
+function navigateToRepo(routeName) {
     router.push(`/${routeName}/${route.params.guid}`)
 }
+
+const getItems = computed(() => route.name != null && route.name.includes('home') ? homeItems : repoItems)
 
 </script>
 
 <template>
-    <Menu v-if="route.name != 'home'" :model="items" class="w-full md:w-60">
+    <Menu :model="getItems" class="w-full md:w-60">
         <template #start></template>
         <template #submenulabel="{ item }">
             <span class="text-primary font-bold">{{ item.label }}</span>
