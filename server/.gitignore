@@ -3,6 +3,8 @@
 .wogpd/
 database.db
 .env
+agent.name
+agent.guid
 
 # Logs
 logs

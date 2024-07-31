@@ -1,12 +1,15 @@
 
 const agents = []
 
-export function addAgent(name){
+export function addAgent(agent){
     agents.push({
-        name: name,
+        guid: agent.guid,
+        name: agent.name,
+        version: agent.version,
         running: false
     })
-    console.log(`[manager] Added agent: ${name}`)
+
+    console.log(`[manager] Added agent: ${JSON.stringify(agent)}`)
 }
 
 export function removeAgent(name){

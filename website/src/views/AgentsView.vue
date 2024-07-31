@@ -41,6 +41,7 @@ onBeforeMount(async () => {
           <DataTable :value="agents" selectionMode="single" tableStyle="min-width: 50rem" @rowSelect="onSelectTable">
               <Column field="name" header="Name"></Column>
               <Column field="running" header="Is Running"></Column>
+              <Column field="version" header="Version"></Column>
           </DataTable>
       </template>
     </Card>

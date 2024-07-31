@@ -15,18 +15,13 @@ import config from '#src/server.config.js';
 export default async function initializeListener(){
     // Register agent
     onTopic(['agent', 'register'], (parsedTopic, payload) => {
-        var agentName = payload
-        console.log(`[agent] Registered agent: ${agentName}`)
-        
-        addAgent(agentName)
+        var agent = JSON.parse(payload)
+        addAgent(agent)
     })
 
     // Unregister agent
     onTopic(['agent', 'unregister'], (parsedTopic, payload) => {
         var agentName = payload
-        console.log(`[agent] Unregistered agent: ${agentName}`)
-
-        // Remove the agent
         removeAgent(agentName)
     })
 
