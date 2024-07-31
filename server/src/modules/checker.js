@@ -34,7 +34,7 @@ export default async function initializeChecker(){
 
                                         console.log(`[checker] Pipeline ${pipeline.name} found, executing...`)
                                         // Execute CI/CD pipeline
-                                        await runPipeline(repo.id, pipeline.id, "Automatic checker pipeline")
+                                        await runPipeline(repo, pipeline, "Automatic checker pipeline")
                                     })
                                     .catch(error => {
                                         console.error(`[checker] Error getting pipeline ${checkerPipeline.value}: ${error}`)
