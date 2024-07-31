@@ -6,12 +6,12 @@ const config = {
     defaultWorkerFolderPath: './.wogpd',
     defaultStorageFolderPath: './.stgpd',
     
-    repositoryCheckInterval: 100000,
+    repositoryCheckInterval: 10000,
 
     databaseFilePath: './database.db',
 
     mqttServerPort: 8888,
-    mqttServerUrl: 'ws://192.168.1.2:8888', // <-- TODO: ip is needed for local agent, find a way to get it dynamically
+    mqttServerUrl: 'ws://localhost:8888',
     apiServerUrl: 'http://localhost:3000/api',
 
     DEBUG_MODE: true
