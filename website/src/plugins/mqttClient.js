@@ -3,9 +3,14 @@ import mqtt from "mqtt"
 var mqttClient = null
 
 export default {
-    install: (app) => {
+    install: (app, config) => {
+        if (config.url == null || config.url == '') {
+            console.error('Please provide a valid MQTT server URL');
+            return;
+        }
+
         console.log('MQTT client plugin installed');
-        mqttClient = mqtt.connect("ws://192.168.1.2:8888")
+        mqttClient = mqtt.connect(config.url)
 
         mqttClient.on('connect', function () {
             console.log('Connected to MQTT server');

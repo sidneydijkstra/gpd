@@ -8,10 +8,12 @@ import fontAwesome from './plugins/fontAwesome.js'
 import directives from "./directives"
 import App from './App.vue'
 
+import config from './website.config.js'
+
 createApp(App)
     .use(router)
     .use(directives)
-    .use(mqtt)
+    .use(mqtt, { url: config.mqttServerUrl })
     .use(primevue)
     .use(fontAwesome)
     .mount('#app')

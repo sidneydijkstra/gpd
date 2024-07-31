@@ -1,6 +1,8 @@
 import { generateAPI } from "./apiClient.js";
 
-const apiClient = generateAPI("http://localhost:3000/api", {
+import config from '@/website.config.js'
+
+const apiClient = generateAPI(config.apiServerUrl, {
     headers: {
         "Content-Type": "application/json",
     },
