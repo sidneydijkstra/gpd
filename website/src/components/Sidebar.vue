@@ -50,7 +50,7 @@ const repoItems = [
     {
         label: 'Storage',
         icon: 'pi pi-warehouse',
-        command: () => navigateToRepo('pipe')
+        command: () => navigateToRepo('storage')
     },
     {
         label: 'Settings',

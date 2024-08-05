@@ -1,7 +1,7 @@
 import fs from 'fs';
 import config from '#src/server.config.js';
 
-export async function addStorageFromRequest(request, overwriteName = null) {
+export async function saveZipFromRequest(request, overwriteName = null) {
     createFolder(config.defaultWorkerFolderPath)
 
     return new Promise((resolve, reject) => {

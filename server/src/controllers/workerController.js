@@ -3,7 +3,7 @@ import { v4 } from 'uuid'
 import { getRepositoryById } from '#src/modules/database/repositories.js'
 import { getPipelineByGuid, getPipelineTransactionByGuid } from '#src/modules/database/pipelines.js'
 import { addArtifact } from '#src/modules/database/artifacts.js'
-import { addStorageFromRequest } from '#src/modules/fileClient.js'
+import { saveZipFromRequest } from '#src/modules/fileClient.js'
 
 import { zipFolder } from '#src/helpers/zipHelper.js'
 
@@ -41,7 +41,7 @@ router.get('/api/worker/:pipelineGuid/:transactionGuid/work', async (req, res) =
 router.post('/api/worker/:pipelineGuid/:transactionGuid/upload', async (req, res) => {
     var guid = v4()
 
-    addStorageFromRequest(req, `${guid}.zip`)
+    saveZipFromRequest(req, `${guid}.zip`)
         .then(() => {
             addArtifact(req.params.transactionGuid, guid)
                 .then(() => {

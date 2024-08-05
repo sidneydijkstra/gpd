@@ -14,6 +14,9 @@ import { RouterView } from 'vue-router'
       <RouterView />
     </div>
   </div>
+
+  <!-- Confirm Dialog from primevue -->
+  <ConfirmDialog />
 </template>
 
 <style scoped>

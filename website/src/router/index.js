@@ -5,6 +5,7 @@ import AgentsView from '@/views/AgentsView.vue'
 import SettingsView from '@/views/SettingsView.vue'
 
 import RepoView from '@/views/RepoView.vue'
+import StorageView from '@/views/StorageView.vue'
 import PipeView from '@/views/PipeView.vue'
 import PipeEditView from '@/views/PipeEditView.vue'
 import PipeTransView from '@/views/PipeTransView.vue'
@@ -16,6 +17,7 @@ const routes = [
   { name: 'home-agents', path: '/agents', component: AgentsView },
   { name: 'home-settings', path: '/settings', component: SettingsView },
   { name: 'repo', path: '/repo/:guid', component: RepoView },
+  { name: 'repo-storage', path: '/storage/:guid', component: StorageView },
   { name: 'repo-view', path: '/repo/:guid/:folders(.*)*', component: RepoView },
   { name: 'pipe', path: '/pipe/:guid', component: PipeView },
   { name: 'pipe-editn', path: '/pipe/:guid/edit', component: PipeEditView },

@@ -75,6 +75,17 @@ import { open } from 'sqlite'
             path varchar(255) NOT NULL,
             FOREIGN KEY (transactionId) REFERENCES pipeline_transactions(id) ON DELETE CASCADE
         );
+
+        CREATE TABLE IF NOT EXISTS storage (
+            id integer PRIMARY KEY AUTOINCREMENT NOT NULL,
+            guid varchar(255) NOT NULL,
+            repoId integer,
+            name varchar(255) NOT NULL,
+            type varchar(255) NOT NULL,
+            content text,
+            lastUpdated time NOT NULL,
+            FOREIGN KEY (repoId) REFERENCES repos(id) ON DELETE CASCADE
+        );
     `)
 })()
 

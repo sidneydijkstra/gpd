@@ -5,7 +5,6 @@ import git from '@npmcli/git';
 export async function cloneRepository(url, branch, folderName) {
     createFolder(config.defaultRepoFolderPath)
 
-    console.log(url, folderName)
     var folderPath = `${config.defaultRepoFolderPath}/${folderName}`
     if(isFolderGitRepository(folderPath)) {
         console.log("Folder already is a git repository")
@@ -17,7 +16,6 @@ export async function cloneRepository(url, branch, folderName) {
 export async function pullRepository(folderName) {
     var isSuccessful = false
     var folderPath = `${config.defaultRepoFolderPath}/${folderName}`
-    console.log(folderPath)
     if(isFolderGitRepository(folderPath)) {
         await git.spawn(['pull'], {cwd: folderPath})
             .then(response => {

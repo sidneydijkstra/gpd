@@ -26,6 +26,7 @@ import SelectButton from 'primevue/selectbutton';
 import FloatLabel from 'primevue/floatlabel';
 import Listbox from 'primevue/listbox';
 import ToggleSwitch from 'primevue/toggleswitch';
+import ScrollPanel from 'primevue/scrollpanel';
 
 export default {
     install: (app) => {
@@ -60,5 +61,6 @@ export default {
         app.component("FloatLabel", FloatLabel);
         app.component("Listbox", Listbox);
         app.component("ToggleSwitch", ToggleSwitch);
+        app.component("ScrollPanel", ScrollPanel);
     }
 }

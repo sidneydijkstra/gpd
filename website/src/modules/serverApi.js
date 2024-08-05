@@ -106,3 +106,33 @@ export async function getPipelineTasks(pipelineGuid, transactionGuid){
 export async function getAgents(){
     return apiClient.agents.get()
 }
+
+export async function getAllStorage(){
+    return apiClient.storage.get()
+}
+
+export async function getStorageByRepository(guid){
+    return apiClient.storage.repository[`${guid}`].get()
+}
+
+export async function addStorage(name, type, content, repoGuid = null){
+    return apiClient.storage.post({
+        name: name,
+        type: type,
+        content: content,
+        repoGuid: repoGuid
+    })
+}
+
+export async function updateStorage(guid, name, type, content, repoGuid = null){
+    return apiClient.storage[`${guid}`].post({
+        name: name,
+        type: type,
+        content: content,
+        repoGuid: repoGuid
+    })
+}
+
+export async function deleteStorage(guid){
+    return apiClient.storage[`${guid}`].delete()
+}

@@ -3,6 +3,7 @@ import PipelineSelect from '@/components/PipelineSelect.vue';
 import { onBeforeMount, onMounted, reactive, ref, watch, computed } from 'vue';
 import { useRoute, useRouter } from 'vue-router'
 import { getRepositoryByGuid, updateRepository, deleteRepository, getSettings, updateSetting, updateRepositorySetting } from '@/modules/serverApi.js'
+import { useConfirm } from 'primevue/useconfirm';
 
 const route = useRoute()
 const router = useRouter()
@@ -16,6 +17,19 @@ const settings = reactive({
   checkerEnabled: false,
   checkerPipeline: ''
 })
+
+const confirm = useConfirm();
+const onDeleteRepository = async () => {
+    confirm.require({
+        message: 'Are you sure you want delete this repository?',
+        header: `Removing ${repo.value.username}/${repo.value.repository}`,
+        icon: 'icon-delete',
+        rejectLabel: 'Cancel',
+        acceptLabel: 'Remove',
+        acceptClass: 'p-button-danger',
+        accept: onClickDelete,
+    });
+}
 
 async function saveSettings(){
   if(!settingsChanged)
@@ -137,7 +151,7 @@ onBeforeMount(async () => {
               </div>
               <small>If you want to delete the repository you can use the delete button. Deleting the repository will also delete all the related resources!</small>
               <div class="d-grid gap p-2">
-                <Button class="p-button-danger" @click="onClickDelete">Delete</Button>
+                <Button class="p-button-danger" @click="onDeleteRepository">Delete</Button>
               </div>
             </div>
             

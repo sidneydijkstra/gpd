@@ -118,24 +118,26 @@ onBeforeMount(async () => {
             <div class="row p-0 m-0">
                 <div class="col-4">
                     <h5><b>Tasks</b></h5>
-                    <div v-for="task in tasks" class="m-1">
-                        <Panel :collapsed="true" toggleable v-on:click="onClickTask(task)">
-                            <template #header>
-                                <span>{{ task.title }}</span>
-                            </template>
-                            <template #icons>
-                                <ProgressSpinner v-if="task.status == pipelineTaskStatus.running" style="width: 1rem; height: 1rem; color: white !important" strokeWidth="8" />
-                                <i v-else-if="task.status == pipelineTaskStatus.completed" class="pi pi-check-circle" style="font-size: 1rem"></i>
-                                <i v-else-if="task.status == pipelineTaskStatus.failed" class="pi pi-times-circle" style="font-size: 1rem"></i>
-                                &nbsp;
-                            </template>
-                            <div class="flex flex-row">
-                                <p class="font-bold m-0">Type: {{ task.type }}</p>
-                                <p class="font-bold">Status: {{ task.status }}</p>
-                                <small class="m-0">Updated 2 hours ago</small>
-                            </div>
-                        </Panel>
-                    </div>
+                    <ScrollPanel style="width: 100%; height: 720px; padding-right: 8px;">
+                        <div v-for="task in tasks" class="m-1">
+                            <Panel :collapsed="true" toggleable v-on:click="onClickTask(task)">
+                                <template #header>
+                                    <span>{{ task.title }}</span>
+                                </template>
+                                <template #icons>
+                                    <ProgressSpinner v-if="task.status == pipelineTaskStatus.running" style="width: 1rem; height: 1rem; color: white !important" strokeWidth="8" />
+                                    <i v-else-if="task.status == pipelineTaskStatus.completed" class="pi pi-check-circle" style="font-size: 1rem"></i>
+                                    <i v-else-if="task.status == pipelineTaskStatus.failed" class="pi pi-times-circle" style="font-size: 1rem"></i>
+                                    &nbsp;
+                                </template>
+                                <div class="flex flex-row">
+                                    <p class="font-bold m-0">Type: {{ task.type }}</p>
+                                    <p class="font-bold">Status: {{ task.status }}</p>
+                                    <small class="m-0">Updated 2 hours ago</small>
+                                </div>
+                            </Panel>
+                        </div>
+                    </ScrollPanel>
                 </div>
                 
                 <div class="col-8" v-if="selectedTask != null">
