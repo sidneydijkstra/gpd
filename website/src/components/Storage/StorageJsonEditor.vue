@@ -117,6 +117,21 @@ function addVariable(){
     model.value[variable.key] = variable.value
 }
 
+function removeVariable(variable){
+    // Remove variable from variables and savedVariables
+    variables.value.splice(variable.index, 1)
+    savedVariables.value.splice(variable.index, 1)
+
+    // Update index
+    for (var i = 0; i < variables.value.length; i++) {
+        variables.value[i].index = i
+        savedVariables.value[i].index = i
+    }
+
+    // Update model
+    delete model.value[variable.key]
+}
+
 </script>
 
 <template>
@@ -126,6 +141,7 @@ function addVariable(){
             <InputGroup>
                 <InputText placeholder="Name" v-model="variable.key" @input="onKeyChange(variable.key, savedVariables[i])" />
                 <InputText placeholder="Value" v-model="variable.value" @input="onValueChange(variable.value, savedVariables[i])" />
+                <Button icon="pi pi-times" severity="danger" @click="removeVariable(variable)" />
             </InputGroup>
         </div>
         <div class="p-1">
