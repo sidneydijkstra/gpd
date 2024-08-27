@@ -160,7 +160,6 @@ onBeforeMount(async () => {
                 <div class="col-4">
                     <h5><b>Storages</b></h5>
                     <ScrollPanel style="width: 100%; height: 720px; padding-right: 8px;">
-                        
                         <div v-for="storage in storages" class="m-1 d-flex">
                             <Panel :collapsed="true" toggleable @click="selectStorage(storage)" style="width: 100%;">
                                 <template #header>
@@ -170,6 +169,7 @@ onBeforeMount(async () => {
                                     <Button label="delete" severity="danger" rounded text @click="onDeleteStorage(storage)" />
                                     &nbsp;
                                 </template>
+                                {{ storage.guid }}
                             </Panel>
                         </div>
                         <div>

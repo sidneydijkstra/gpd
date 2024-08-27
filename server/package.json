@@ -21,7 +21,7 @@
     "dotenv": "^16.4.5",
     "express": "^4.19.2",
     "github-api": "^3.4.0",
-    "gpd-agent": "^1.0.17",
+    "gpd-agent": "^1.0.18",
     "mqtt": "^5.8.0",
     "node-fetch": "^3.3.2",
     "sqlite": "^5.1.1",

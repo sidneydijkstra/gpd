@@ -25,13 +25,16 @@ router.get('/api/storage/:guid', async (req, res) => {
 })
 
 router.get('/api/storage/repository/:repoGuid', async (req, res) => {
+    // Check if repository is present
     getRepositoryByGuid(req.params.repoGuid)
         .then(async repo => {
+            // Check if repository is present
             if(repo == null){
                 res.status(404).json({message: 'Repository not found'})
                 return
             }
 
+            // Get all storage for repository
             getAllStorageByRepositoryId(repo.id)
                 .then(response => {
                     res.status(200).json(response)
@@ -46,14 +49,15 @@ router.get('/api/storage/repository/:repoGuid', async (req, res) => {
 })
 
 router.post('/api/storage', async (req, res) => {
-    console.log('add storage')
     const storage = req.body
 
+    // Check if required fields are present
     if(storage.name == null || storage.type == null || storage.content == null){
         res.status(400).json({message: 'Missing required fields'})
         return
     }
 
+    // Check if repository is present
     var repoId = null
     if(storage.repoGuid != null && storage.repoGuid != ''){
         await getRepositoryByGuid(storage.repoGuid)
@@ -62,6 +66,7 @@ router.post('/api/storage', async (req, res) => {
             })
     }
 
+    // Add storage
     addStorage(storage.name, storage.type, storage.content, repoId)
         .then((guid) => {
             res.status(200).json(guid)
@@ -72,14 +77,15 @@ router.post('/api/storage', async (req, res) => {
 })
 
 router.post('/api/storage/:guid', async (req, res) => {
-    console.log('update storage')
     const storage = req.body
 
+    // Check if required fields are present
     if(storage.name == null || storage.type == null || storage.content == null){
         res.status(400).json({message: 'Missing required fields'})
         return
     }
 
+    // Check if repository is present
     var repoId = null
     if(storage.repoGuid != null && storage.repoGuid != ''){
         await getRepositoryByGuid(storage.repoGuid)
@@ -88,6 +94,7 @@ router.post('/api/storage/:guid', async (req, res) => {
             })
     }
 
+    // Update storage
     updateStorage(req.params.guid, storage.name, storage.type, storage.content, repoId ?? null)
         .then(() => {
             res.status(200).json(req.params.guid)
@@ -98,7 +105,6 @@ router.post('/api/storage/:guid', async (req, res) => {
 })
 
 router.delete('/api/storage/:guid', async (req, res) => {
-    console.log('delete storage')
     removeStorageByGuid(req.params.guid)
         .then(() => {
             res.status(200).json()

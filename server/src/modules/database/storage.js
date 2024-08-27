@@ -55,9 +55,25 @@ export function getStorageByGuid(guid){
     return new Promise(async (resolve, reject) => {
         await getConnection()
           .then(async conn => {
-            var result = await conn.all('select * from storage where guid = ?', guid)
+            var result = await conn.all('select * from storage where guid = ? limit 1', guid)
             conn.close()
-            resolve(result)
+            resolve(result[0])
+          })
+          .catch(reject)
+    })
+}
+
+export function getStorageByName(name, repoId){
+    return new Promise(async (resolve, reject) => {
+        await getConnection()
+          .then(async conn => {
+            var result = await conn.all('select * from storage where name = ? and repoId = ? or name = ? and repoId is null limit 1', 
+              name,
+              repoId,
+              name
+            )
+            conn.close()
+            resolve(result[0])
           })
           .catch(reject)
     })
@@ -70,6 +86,19 @@ export function getAllStorageByRepositoryId(repoId){
             var result = await conn.all('select * from storage where repoId = ? or repoId is null', repoId)
             conn.close()
             resolve(result)
+          })
+          .catch(reject)
+    })
+}
+
+export function hasStorageWithName(name){
+    return new Promise(async (resolve, reject) => {
+        await getConnection()
+          .then(async conn => {
+            var result = await conn.all('select * from storage where name = ?', name)
+            conn.close()
+
+            result.length > 0 ? resolve() : resolve()
           })
           .catch(reject)
     })

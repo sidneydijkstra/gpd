@@ -1,3 +1,34 @@
+storage:
+  - name: 'MyStorage'
+  - guid: 'b4a0effe-ab60-4f3e-96a9-39df79b80957'
+    alias: 'GuidStorage'
+  - name: 'MyStorage'
+    alias: 'AliasStorage'
+  - name: 'MyFile'
+
+jobs:
+  - name: 'Storage Test'
+    tasks:
+      - name: 'useCmd'
+        title: 'Print variable in MyStorage'
+        command: 'echo ${MyStorage.var}'
+      - name: 'useCmd'
+        title: 'Print variable in GuidStorage'
+        command: 'echo ${GuidStorage.var}'
+      - name: 'useCmd'
+        title: 'Print variable in AliasStorage'
+        command: 'echo ${AliasStorage.var}'
+      - name: 'useFile'
+        title: 'Create file MyFile.txt'
+        filename: 'MyFile.txt'
+        content: '${MyFile}'
+      - name: 'useFile'
+        title: 'Create file MyFile.txt in directory'
+        filename: 'MyFile.txt'
+        content: '${MyFile}'
+        directory: 'blah/flah/hah'
+
+
 jobs:
   - name: 'job1'
     tasks:
