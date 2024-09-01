@@ -1,33 +1,22 @@
 import fs from 'fs';
 import config from '#src/server.config.js';
 
-export async function saveZipFromRequest(request, overwriteName = null) {
-    createFolder(config.defaultWorkerFolderPath)
+export async function saveFileFromRequest(req, fileName) {
+    createFolder(config.defaultArtifactFolderPath)
+
+    const filePath = `${config.defaultArtifactFolderPath}/${fileName}`;
 
     return new Promise((resolve, reject) => {
-        const boundary = request.headers['content-type'].split('boundary=')[1];
-        const parts = request.body.toString().split(`--${boundary}`);
-        
-        parts.forEach(part => {
-            if (part.includes('Content-Disposition')) {
-              // const nameMatch = part.match(/name="([^"]+)"/);
-              const filenameMatch = part.match(/filename="([^"]+)"/);
-        
-              if (filenameMatch) {
-                const filename = overwriteName == null ? filenameMatch[1] : overwriteName;
-                const fileData = part.split('\r\n\r\n')[1];
-                const filePath = path.join(__dirname, 'uploads', filename);
-        
-                fs.writeFile(filePath, fileData, 'binary', (err) => {
-                  if (err) {
-                    reject(err);
-                  }
-                });
-              }
+        // Save the ZIP file to the specified path
+        fs.writeFile(filePath, req.body, (err) => {
+            if (err) {
+                reject(err)
+                return
             }
+            
+            resolve();
         });
 
-        resolve();
     });
 }
 

@@ -1,10 +1,10 @@
 import express from 'express'
 import { v4 } from 'uuid'
 import { getRepositoryById } from '#src/modules/database/repositories.js'
-import { getPipelineByGuid, getPipelineTransactionByGuid } from '#src/modules/database/pipelines.js'
+import { getPipelineTransactionByGuid } from '#src/modules/database/pipelines.js'
 import { addArtifact } from '#src/modules/database/artifacts.js'
 import { getStorageByGuid, getStorageByName } from '#src/modules/database/storage.js'
-import { saveZipFromRequest } from '#src/modules/fileClient.js'
+import { saveFileFromRequest } from '#src/modules/fileClient.js'
 
 import { zipFolder } from '#src/helpers/zipHelper.js'
 
@@ -33,21 +33,29 @@ router.get('/api/worker/:transactionGuid/work', async (req, res) => {
         })
 })
 
-router.post('/api/worker/:transactionGuid/upload', async (req, res) => {
+router.use(express.raw({ type: 'application/zip', limit: '50mb' }));
+router.post('/api/worker/:transactionGuid/artifacts', async (req, res) => {
+    var transaction = await getPipelineTransactionByGuid(req.params.transactionGuid)
+    if(transaction == null){
+        res.status(404).json({message: 'Transaction not found'})
+        return
+    }
+    
     var guid = v4()
+    var path = `${guid}.zip`;
 
-    saveZipFromRequest(req, `${guid}.zip`)
+    saveFileFromRequest(req, path)
         .then(() => {
-            addArtifact(req.params.transactionGuid, guid)
+            addArtifact(guid, transaction.id, guid, path)
                 .then(() => {
                     res.status(200).json({message: 'Artifact uploaded'})
                 })
-                .catch(() => {
-                    res.status(500).json({message: 'Error uploading artifact'})
+                .catch((error) => {
+                    res.status(500).json({message: 'Error uploading artifact: ' + error})
                 })
         })
-        .catch(() => {
-            res.status(500).json({message: 'Error uploading artifact'})
+        .catch((error) => {
+            res.status(500).json({message: 'Error zipping artifact: ' + error})
         })
 })
 

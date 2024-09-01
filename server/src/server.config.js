@@ -4,7 +4,7 @@ const config = {
 
     defaultRepoFolderPath: './.regpd',
     defaultWorkerFolderPath: './.wogpd',
-    defaultStorageFolderPath: './.stgpd',
+    defaultArtifactFolderPath: './.argpd',
     
     repositoryCheckInterval: 10000,
 
