@@ -10,6 +10,7 @@ import pipelineRouter from './src/controllers/pipelineController.js'
 import workerRouter from './src/controllers/workerController.js'
 import agentRouter from './src/controllers/agentController.js'
 import storageRouter from './src/controllers/storageController.js'
+import artifactRouter from './src/controllers/artifactController.js'
 
 import initializeMqtt from './src/modules/mqtt/mqttServer.js'
 import initializeListener from './src/modules/agent.js'
@@ -28,6 +29,7 @@ app.use(pipelineRouter)
 app.use(workerRouter)
 app.use(agentRouter)
 app.use(storageRouter)
+app.use(artifactRouter)
 
 app.listen(port, () => {
     console.log(`Example app listening on port ${port}`)

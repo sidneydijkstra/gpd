@@ -11,6 +11,7 @@ export default {
 
         console.log('MQTT client plugin installed');
         mqttClient = mqtt.connect(config.url)
+        mqttClient.setMaxListeners(50) // <-- TODO: this is bad practice... But works for now.
 
         mqttClient.on('connect', function () {
             console.log('Connected to MQTT server');

@@ -28,6 +28,27 @@ jobs:
         content: '${MyFile}'
         directory: 'blah/flah/hah'
 
+jobs:
+  - name: 'Artifact Test'
+    tasks:
+      - name: 'useCmd'
+        title: 'Create text file with content'
+        command: 'echo "Hello World" >> file.txt'
+      - name: 'useArtifact'
+        title: 'Upload artifact file.txt'
+        file: 'file.txt'
+      - name: 'useArtifact'
+        title: 'Upload artifact renamed_file.txt'
+        file: 'file.txt'
+        targetName: 'renamed_file_01.txt'
+      - name: 'useArtifact'
+        title: 'Upload artifact renamed_file.txt'
+        file: 'file.txt'
+        targetName: 'renamed_file_02.txt'
+      - name: 'useArtifact'
+        title: 'Upload artifact renamed_file.txt'
+        file: './file.txt'
+        targetName: 'renamed_file_03.txt'
 
 jobs:
   - name: 'job1'

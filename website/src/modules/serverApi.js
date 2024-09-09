@@ -103,6 +103,14 @@ export async function getPipelineTasks(pipelineGuid, transactionGuid){
     return apiClient.pipeline[`${pipelineGuid}`].transaction[`${transactionGuid}`].task.get()
 }
 
+export async function getArtifacts(query = null){
+    return query ? apiClient.artifact.get(query) : apiClient.artifact.get()
+}
+
+export async function downloadArtifact(artifactGuid){
+    return apiClient.artifact[`${artifactGuid}`].download.blob()
+}
+
 export async function getAgents(){
     return apiClient.agents.get()
 }
