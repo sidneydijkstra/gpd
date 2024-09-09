@@ -54,7 +54,7 @@ onBeforeMount(async () => {
 <template>
   <div v-if="!isLoading" class="row justify-content-center m-0">
     <Card>
-      <template #title>{{ repo.username }}/{{ repo.repository }}</template>
+      <template #title>{{ repo.username }}/{{ repo.repository }}&nbsp;-&nbsp;Pipelines</template>
       <template #content>
           <div class="d-grid gap-2 d-md-flex justify-content-md-end">
             <Button label="Create Pipeline" icon="pi pi-home" aria-label="Save" severity="secondary" v-on:click="navigateToEdit" />  

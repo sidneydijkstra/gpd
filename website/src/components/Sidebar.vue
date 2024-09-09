@@ -45,7 +45,7 @@ const repoItems = [
     {
         label: 'Artifacts',
         icon: 'pi pi-shopping-bag',
-        command: () => navigateToRepo('pipe')
+        command: () => navigateToRepo('arti')
     },
     {
         label: 'Storage',

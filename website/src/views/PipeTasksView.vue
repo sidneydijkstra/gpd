@@ -172,7 +172,6 @@ onBeforeMount(async () => {
                         </div>
                     </ScrollPanel>
                     
-
                     <div class="d-flex justify-content-center" v-if="artifact">
                         <Button class="m-1" style="width: 100%;" :label="`Download Artifacts`" severity="secondary" @click="onDownloadArtifact()" />
                     </div>
