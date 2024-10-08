@@ -154,7 +154,7 @@ onBeforeMount(async () => {
 <template>
   <div v-if="!isLoading">
     <Card>
-        <template #title>{{ repo.username }}/{{ repo.repository }}</template>
+        <template #title>{{ repo.username }}/{{ repo.repository }}&nbsp;-&nbsp;Storage</template>
         <template #content>
             <div class="row p-0 m-0">
                 <div class="col-4">

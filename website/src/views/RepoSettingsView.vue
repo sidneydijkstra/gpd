@@ -118,7 +118,9 @@ onBeforeMount(async () => {
     <Card>
       <template #title>
         <div class="d-flex justify-content-between">
-          <h4 class="p-0 m-0">Settings</h4>
+          <span>
+            {{ repo.username }}/{{ repo.repository }}&nbsp;-&nbsp;Settings
+          </span>
           <Button v-if="settingsChanged" v-on:click="saveSettings()" class="p-0" label="Save" text />
         </div>
       </template>

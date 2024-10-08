@@ -1,9 +1,10 @@
 <script setup>
 import { onBeforeMount, ref} from 'vue';
 import { useRoute, useRouter } from 'vue-router'
-import { getRepositoryByGuid, getPipelineByGuid, getPipelineTasks } from '@/modules/serverApi.js'
+import { getRepositoryByGuid, getPipelineByGuid, getPipelineTasks, getArtifacts, downloadArtifact } from '@/modules/serverApi.js'
 import pipelineTaskStatus from '@/enums/pipelineTaskStatus.js'
 import onMqttCallback from '@/composables/onMqttCallback';
+import pipelineStatus from '@/enums/pipelineStatus.js';
 
 const route = useRoute()
 const router = useRouter()
@@ -13,6 +14,15 @@ const repo = ref(null)
 const pipeline = ref(null)
 const tasks = ref(null)
 const selectedTask = ref(null)
+const artifact = ref(null)
+
+function onDownloadArtifact(){
+    downloadArtifact(artifact.value.guid)
+        .then(response => {
+            var fileUrl = URL.createObjectURL(response)
+            window.location.assign(fileUrl)
+        })
+}
 
 function onNavigateBack(){
     router.push(`/pipe/${route.params.guid}/trans/${route.params.pipeGuid}`)
@@ -20,6 +30,15 @@ function onNavigateBack(){
 
 async function onClickTask(task){
     selectedTask.value = task
+}
+
+function listenToTransaction(){ 
+    onMqttCallback(`trans/${route.params.transGuid}`, (transaction, cancelEvent) => {
+        if(transaction.status == pipelineStatus.completed) {
+            reload()
+            cancelEvent()
+        }
+    }, true)
 }
 
 function listenToTask(taskGuid){
@@ -75,7 +94,7 @@ async function reload(){
         })
 
     await getPipelineTasks(route.params.pipeGuid, route.params.transGuid)
-        .then(response => {
+        .then(async response => {
             if(response.length <= 0)
                 return
             
@@ -89,12 +108,23 @@ async function reload(){
             }
 
             // Loop all tasks and listen for updates if there still running
+            var allTaskCompleted = true
             for(let i = 0; i < response.length; i++){
                 // Skip completed and failed tasks
                 if(response[i].status == pipelineTaskStatus.completed || response[i].status == pipelineTaskStatus.failed)
                     continue
 
                 listenToTask(response[i].guid)
+                allTaskCompleted = false
+            }
+
+            if(allTaskCompleted){
+                await getArtifacts({ transaction: route.params.transGuid})
+                    .then(response => {
+                        artifact.value = response.length > 0 ? response[0] : null
+                    })
+            }else{
+                listenToTransaction()
             }
         })
         .catch(error => {
@@ -113,7 +143,10 @@ onBeforeMount(async () => {
 <template>
   <div v-if="!isLoading">
     <Card>
-        <template #title><Button icon="pi pi-arrow-left"  size="small" severity="secondary" v-on:click="onNavigateBack" text /> {{ repo.username }}/{{ repo.repository }}</template>
+        <template #title>
+            <Button icon="pi pi-arrow-left"  size="small" severity="secondary" v-on:click="onNavigateBack" text /> 
+            {{ repo.username }}/{{ repo.repository }}
+        </template>
         <template #content>
             <div class="row p-0 m-0">
                 <div class="col-4">
@@ -138,6 +171,10 @@ onBeforeMount(async () => {
                             </Panel>
                         </div>
                     </ScrollPanel>
+                    
+                    <div class="d-flex justify-content-center" v-if="artifact">
+                        <Button class="m-1" style="width: 100%;" :label="`Download Artifacts`" severity="secondary" @click="onDownloadArtifact()" />
+                    </div>
                 </div>
                 
                 <div class="col-8" v-if="selectedTask != null">

@@ -10,6 +10,7 @@ import PipeView from '@/views/PipeView.vue'
 import PipeEditView from '@/views/PipeEditView.vue'
 import PipeTransView from '@/views/PipeTransView.vue'
 import PipeTasksView from '@/views/PipeTasksView.vue'
+import PipeArtifactView from '@/views/PipeArtifactView.vue'
 import RepoSettingsView from '@/views/RepoSettingsView.vue'
 
 const routes = [
@@ -24,6 +25,7 @@ const routes = [
   { name: 'pipe-edit', path: '/pipe/:guid/edit/:pipeGuid', component: PipeEditView },
   { name: 'pipe-trans', path: '/pipe/:guid/trans/:pipeGuid', component: PipeTransView },
   { name: 'pipe-trans-tasks', path: '/pipe/:guid/trans/:pipeGuid/tasks/:transGuid', component: PipeTasksView },
+  { name: 'pipe-artifact', path: '/arti/:guid', component: PipeArtifactView },
   { name: 'repo-settings', path: '/settings/:guid', component: RepoSettingsView },
 ]
 
