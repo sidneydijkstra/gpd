@@ -1,9 +1,19 @@
 import sqlite3 from 'sqlite3'
 import { open } from 'sqlite'
 
+// get arguments
+const args = process.argv.slice(2)
+console.log(args)
+
+if (args.length === 0) {
+    console.log('No arguments provided')
+    process.exit(1)
+}
+
+
 (async () => {
     const db = await open({
-      filename: './database.db',
+      filename: args[0],
       driver: sqlite3.Database
     })
 
