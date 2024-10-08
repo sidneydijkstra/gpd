@@ -1,3 +1,4 @@
+# Vueam storage configuration
 storage:
   - name: 'MyStorage'
   - guid: 'b4a0effe-ab60-4f3e-96a9-39df79b80957'
@@ -27,7 +28,17 @@ jobs:
         filename: 'MyFile.txt'
         content: '${MyFile}'
         directory: 'blah/flah/hah'
+      - name: 'useArtifact'
+        title: 'Upload all [1]'
+        file: '/MyFile.txt'
+        targetName: 'myfile.txt'
+      - name: 'useArtifact'
+        title: 'Upload all [2]'
+        directory: '/blah'
+        targetDirectory: './blah'
+        copyContent: true
 
+# Artifact Test
 jobs:
   - name: 'Artifact Test'
     tasks:
@@ -50,6 +61,7 @@ jobs:
         file: './file.txt'
         targetName: 'renamed_file_03.txt'
 
+# Command Test
 jobs:
   - name: 'job1'
     tasks:
@@ -72,6 +84,7 @@ jobs:
         title: 'Run timeout'
         command: 'timeout 2'
 
+# Vueam CI/CD
 jobs:
   - name: 'CI for sidneydijkstra/Vueam'
     tasks:
