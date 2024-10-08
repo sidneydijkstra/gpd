@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 
 # Start the backend
 cd /app/server

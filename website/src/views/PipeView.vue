@@ -25,7 +25,6 @@ async function reload(){
     .then(response => {
         response.content = JSON.parse(response.content)
         repo.value = response
-        console.log(response)
     })
     .catch(error => {
         console.log(error)
@@ -34,7 +33,6 @@ async function reload(){
 
   await getPipelinesByRepository(route.params.guid)
     .then(response => {
-      console.log(response)
         pipelines.value = response ?? []
     })
     .catch(error => {

@@ -61,7 +61,6 @@ async function reloadSettings(){
 
   await hasTokens()
     .then(response => {
-      console.log(response);
       isActionNeeded.value = !response.githubToken && !response.gitlabToken;
       settings.githubAccessToken = response.githubToken ? '●●●●●●●●●●●●●●●●●●●●●' : ''
       settings.gitlabAccessToken = response.gitlabToken ? '●●●●●●●●●●●●●●●●●●●●●' : ''

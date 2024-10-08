@@ -29,7 +29,6 @@ function onSelectPipelineTable(selected){
   getArtifacts({ pipeline: selectedPipeline.value.guid })
     .then(response => {
       artifacts.value = response.reverse()
-      console.log(response)
     })
 }
 

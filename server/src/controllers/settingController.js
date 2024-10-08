@@ -30,8 +30,6 @@ router.post(`/api/setting/tokens/:token`, async (req, res) => {
     
     var token = await getGlobalSetting(req.params.token)
 
-    console.log(token)
-
     if(token == null){
         await addGlobalSetting(req.params.token, req.body.value)
             .then(response => {

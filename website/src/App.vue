@@ -13,7 +13,6 @@ const isActionNeeded = ref(false);
 onBeforeMount(async () => {
   await hasTokens()
     .then(response => {
-      console.log(response);
       isActionNeeded.value = !response.githubToken && !response.gitlabToken;
 
       if(isActionNeeded.value){

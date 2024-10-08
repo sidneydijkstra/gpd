@@ -16,7 +16,6 @@ function onSelectTable(selected){
 async function reload(){
   await getAgents()
     .then(response => {
-      console.log(response)
       agents.value = response ?? []
     })
     .catch(error => {
