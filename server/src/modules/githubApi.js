@@ -1,9 +1,10 @@
 import config from "#src/server.config.js";
 import { useGenerateApi } from "#src/modules/useGenerateApi.js";
-
-const githubToken = process.env.GITHUB_API_KEY;
+import { getGlobalSetting } from "#src/modules/database/settings.js";
 
 export async function getRateLimit(){
+    const githubToken = (await getGlobalSetting('githubToken'))?.value;
+
     const client = useGenerateApi(config.githubApiUrl, {
         headers: {
             "User-Agent": "xyz",
@@ -15,6 +16,8 @@ export async function getRateLimit(){
 }
 
 export async function getGithubRepository(username, repo) {
+    const githubToken = (await getGlobalSetting('githubToken'))?.value;
+
     const client = useGenerateApi(config.githubApiUrl, {
         headers: {
             "User-Agent": "xyz",

@@ -6,6 +6,51 @@ import { checkLocalAgent } from '#src/modules/agent.js'
 
 const router = express.Router()
 
+router.get(`/api/setting/tokens`, async (req, res) => {
+    var githubToken = await getGlobalSetting('githubToken')
+    var gitlabToken = await getGlobalSetting('gitlabToken')
+
+    res.status(200).json({
+        githubToken: githubToken ? true : null, 
+        gitlabToken: gitlabToken ? true : null
+    })
+})
+
+router.post(`/api/setting/tokens/:token`, async (req, res) => {
+    var validTokens = ['githubToken', 'gitlabToken']
+    if(validTokens.includes(req.params.token) == false){
+        res.status(400).json({message: 'Invalid token'})
+        return
+    }
+
+    if(req.body.value == null){
+        res.status(400).json({message: 'Value is required'})
+        return
+    }
+    
+    var token = await getGlobalSetting(req.params.token)
+
+    console.log(token)
+
+    if(token == null){
+        await addGlobalSetting(req.params.token, req.body.value)
+            .then(response => {
+                res.status(200).json(response)
+            })
+            .catch(_ => {
+                res.status(404).json({message: 'Setting not found'})
+            })
+    }else{
+        updateGlobalSetting(req.params.token, req.body.value)
+            .then(response => {
+                res.status(200).json(response)
+            })
+            .catch(_ => {
+                res.status(404).json({message: 'Setting not found'})
+            })
+    }
+})
+
 router.get(`/api/setting/isDockerInstalled`, async (req, res) => {
     isDockerInstalled()
         .then(response => {

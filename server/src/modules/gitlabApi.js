@@ -1,9 +1,10 @@
 import config from "#src/server.config.js";
 import { useGenerateApi } from "#src/modules/useGenerateApi.js";
-
-const gitlabToken = process.env.GITLAB_API_KEY;
+import { getGlobalSetting } from "#src/modules/database/settings.js";
 
 export async function getGitlabRepository(username, repo) {
+    const gitlabToken = (await getGlobalSetting('gitlabToken')).value;
+
     const client = useGenerateApi(config.gitlabApiUrl, {
         headers: {
             Authorization: `bearer ${gitlabToken}`,

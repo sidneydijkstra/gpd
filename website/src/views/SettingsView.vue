@@ -1,8 +1,7 @@
 <script setup>
-import PipelineSelect from '@/components/PipelineSelect.vue';
-import { onBeforeMount, onMounted, reactive, ref, watch, computed } from 'vue';
+import { onBeforeMount, reactive, ref, computed } from 'vue';
 import { useRoute, useRouter } from 'vue-router'
-import { getRepositoryByGuid, updateRepository, deleteRepository, getSettings, updateSetting, updateRepositorySetting } from '@/modules/serverApi.js'
+import { getSettings, updateSetting, hasTokens, updateToken } from '@/modules/serverApi.js'
 
 const route = useRoute()
 const router = useRouter()
@@ -17,9 +16,10 @@ const modeOptions = [
 
 const settingsError = ref('')
 const savedSettings = reactive({})
+const isActionNeeded = ref(false)
 const settings = reactive({
-  githubAccessToken: 'Not implemented',
-  gitlabAccessToken: 'Not implemented',
+  githubAccessToken: 'Loading...',
+  gitlabAccessToken: 'Loading...',
   mode: ''
 })
 
@@ -27,8 +27,21 @@ async function saveSettings(){
   if(!settingsChanged)
     return
 
-  await updateSetting('mode', settings.mode)
-  settingsError.value = null
+  if(settings.mode != savedSettings.mode){
+    await updateSetting('mode', settings.mode)
+    settingsError.value = null
+  }
+
+  if(settings.githubAccessToken != savedSettings.githubAccessToken){
+    await updateToken('githubToken', settings.githubAccessToken)
+    settingsError.value = null
+  }
+
+  if(settings.gitlabAccessToken != savedSettings.gitlabAccessToken){
+    await updateToken('gitlabToken', settings.gitlabAccessToken)
+    settingsError.value = null
+  }
+  
   await reloadSettings()
 }
 
@@ -40,13 +53,31 @@ const settingsChanged = computed(() => {
 
 async function reloadSettings(){
   isLoading.value = true
+
+  if(isActionNeeded.value){
+    window.location.reload()
+    return
+  }
+
+  await hasTokens()
+    .then(response => {
+      console.log(response);
+      isActionNeeded.value = !response.githubToken && !response.gitlabToken;
+      settings.githubAccessToken = response.githubToken ? '●●●●●●●●●●●●●●●●●●●●●' : ''
+      settings.gitlabAccessToken = response.gitlabToken ? '●●●●●●●●●●●●●●●●●●●●●' : ''
+
+      savedSettings.githubAccessToken = settings.githubAccessToken
+      savedSettings.gitlabAccessToken = settings.gitlabAccessToken
+    })
+    .catch(error => {
+      settingsError.value = error
+    })
+
   await getSettings(route.params.guid)
     .then(response => {
       var mode = response.find(x => x.key == 'mode')
       settings.mode = mode == null ? 'None' : mode.value
 
-      savedSettings.githubAccessToken = settings.githubAccessToken
-      savedSettings.gitlabAccessToken = settings.gitlabAccessToken
       savedSettings.mode = settings.mode
     })
     .catch(error => {
@@ -81,6 +112,10 @@ onBeforeMount(async () => {
               <p></p>
             </div> -->
             <!-- <hr> -->
+            <div>
+              <p v-if="isActionNeeded" class="error-text">Please provide at least one of the tokens. Then you will be able to access the complete website.</p>
+              <br>
+            </div>
             <p v-if="settingsError" class="error-text">
               {{ settingsError }}
             </p>

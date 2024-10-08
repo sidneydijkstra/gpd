@@ -8,6 +8,16 @@ const apiClient = generateAPI(config.apiServerUrl, {
     },
 });
 
+export async function hasTokens(){
+    return apiClient.setting.tokens.get()
+}
+
+export async function updateToken(token, value){
+    return apiClient.setting.tokens[`${token}`].post({
+        value: value
+    })
+}
+
 export async function getSettings(repoGuid=null){
     // Get the global settings
     var globalSettings = apiClient.setting.global.get()
