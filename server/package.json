@@ -11,6 +11,9 @@
     "dev": "nodemon index.js",
     "prod": "node index.js"
   },
+  "nodemonConfig": {
+      "ignore": [".argpd/*", ".regpd/*", ".wogpd/*"]
+  },
   "dependencies": {
     "@npmcli/git": "^5.0.7",
     "aedes": "^0.51.2",
