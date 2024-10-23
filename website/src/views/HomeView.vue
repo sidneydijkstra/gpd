@@ -3,13 +3,17 @@ import { onMounted, reactive, ref } from 'vue';
 import { useRouter } from 'vue-router'
 import { getStoredRepositories, getRepository } from '@/modules/serverApi.js'
 
+import BlackCircleLoader from '@/components/Utilities/BlackCircleLoader.vue';
+
 const router = useRouter()
 
+const isLoading = ref(false)
 const repos = ref([])
 const repoForm = reactive({
   username: '',
   repository: ''
 })
+const formErrorMessage = ref(null)
 
 const source = ref('github')
 const sourceOptions = [
@@ -25,13 +29,21 @@ function onAddRepository(){
   if(repos.value.find(x => x.username == repoForm.username && x.repository == repoForm.repository))
     return
 
+  isLoading.value = true
+  formErrorMessage.value = null
+
   getRepository(repoForm.username, repoForm.repository, source.value)
     .then(response => {
       response.content = JSON.parse(response.content)
       repos.value.push(response)
     })
     .catch(error => {
-      console.log(error)
+      formErrorMessage.value = error
+    })
+    .finally(() => {
+      isLoading.value = false
+      repoForm.username = ''
+      repoForm.repository = ''
     })
 }
 
@@ -40,12 +52,16 @@ function onNavigateToRepo(guid){
 }
 
 onMounted(async () => {
+  isLoading.value = true
   await getStoredRepositories()
     .then(response => {
       response.forEach(repo => {
         repo.content = JSON.parse(repo.content)
       })
       repos.value = response
+    })
+    .finally(() => {
+      isLoading.value = false
     })
 })
 
@@ -67,7 +83,7 @@ onMounted(async () => {
               <input v-model="repoForm.repository" type="text" class="form-control" placeholder="Repository" aria-label="Repository">
           </div>
           <div class="d-grid gap-2 col-8 mx-auto">
-              <button type="button" class="btn btn-dark" v-on:click="onAddRepository">Add Repository</button>
+              <button type="button" class="btn btn-dark" v-on:click="onAddRepository" :disabled="isLoading">Add Repository</button>
           </div>
 
         </div>
@@ -77,7 +93,11 @@ onMounted(async () => {
 
     <div class="row justify-content-center">
         <div class="col-6">
-        <div class="list-group">
+        <p v-if="formErrorMessage">{{ formErrorMessage }}</p>
+        <div v-if="isLoading" class="d-flex justify-content-center">
+          <BlackCircleLoader />
+        </div>
+        <div v-else class="list-group">
             <a v-for="repo in repos" href="#" class="list-group-item list-group-item-action" aria-current="true" v-on:click="onNavigateToRepo(repo.guid)">
                 <div class="d-flex w-100 justify-content-between">
                     <h5 class="mb-1">{{ repo.username }}/{{ repo.repository }}</h5>

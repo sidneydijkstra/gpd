@@ -66,10 +66,10 @@ async function createPipeline(){
 
   await addPipeline(repo.value.guid, pipeline.value.name, pipeline.value.content)
     .then(response => {
-        router.push(`/pipe/${repo.value.guid}/trans/${response.guid}`)
+      router.push(`/pipe/${repo.value.guid}/trans/${response.guid}`)
     })
     .catch(error => {
-        console.log(error)
+      console.log(error)
     })
 }
 
@@ -80,10 +80,10 @@ async function savePipeline(){
 
   await updatePipeline(route.params.pipeGuid, pipeline.value.name, pipeline.value.content)
     .then(response => {
-        console.log(response)
+      router.push(`/pipe/${repo.value.guid}/trans/${pipeline.value.guid}`)
     })
     .catch(error => {
-        console.log(error)
+      console.log(error)
     })
 }
 
